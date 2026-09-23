@@ -8,6 +8,9 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
+#include <map>
+
+#include "singleton.h"
 
 // 使用流方式将日志级别level的日志写入到logger
 #define SYLAR_LOG_LEVEL(logger, level) \
@@ -131,6 +134,10 @@ public:
 
     void setFormatter(LogFormatter::ptr val) { m_formatter = val; }
     LogFormatter::ptr getFormatter() const { return m_formatter; }
+
+    //TODO 这个的level好像不确定
+    LogLevel::Level getLevel() const { return m_level; }
+    void setLevel(LogLevel::Level val) { m_level = val; }
 protected:
     LogLevel::Level m_level;
     LogFormatter::ptr m_formatter;
@@ -186,6 +193,20 @@ private:
     std::string m_filename;
     std::ofstream m_filestream;
 };
+
+class LoggerManager
+{
+public:
+    LoggerManager();
+    Logger::ptr getLogger(const std::string& name);
+
+    void init();
+private:
+    std::map<std::string, Logger::ptr> m_loggers;
+    Logger::ptr m_root;
+};
+
+using LoggerMgr = sylar::Singleton<LoggerManager>;
 
 } // namespace sylar
 

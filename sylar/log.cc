@@ -300,7 +300,7 @@ void Logger::fatal(LogEvent::ptr event)
 FileLogAppender::FileLogAppender(const std::string& filename)
     :m_filename(filename)
 {
-
+    reopen();
 }
 
 void FileLogAppender::log(Logger::ptr logger, LogLevel::Level level , LogEvent::ptr event)
@@ -471,6 +471,23 @@ void LogFormatter::init()
         //std::cout << "(" << std::get<0>(i) << ") - (" << std::get<1>(i) << ") - (" << std::get<2>(i) << ")" << std::endl;
     }
     //std::cout << m_items.size() << std::endl;
+}
+
+LoggerManager::LoggerManager()
+{
+    m_root.reset(new Logger());
+    m_root->addAppender(LogAppender::ptr(new StdoutLogAppender));
+}
+    
+Logger::ptr LoggerManager::getLogger(const std::string& name)
+{
+    auto it = m_loggers.find(name);
+    return it == m_loggers.end() ? m_root : it->second;
+}
+
+void LoggerManager::init()
+{
+
 }
 
 } // namespace sylar
