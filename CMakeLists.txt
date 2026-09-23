@@ -6,6 +6,7 @@ set(CMAKE_CXX_FALGS "$ENV{CXXFLAGS} -rdynamic -03 -g -std=c++11 -Wall -Wno-depre
 
 set(LIB_SRC
     sylar/log.cc
+    sylar/util.cc
 )
 
 add_library(sylar SHARED ${LIB_SRC})

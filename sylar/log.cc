@@ -3,6 +3,7 @@
 #include <iostream>
 #include <map>
 #include <functional>
+#include <cstdarg>
 
 namespace sylar {
 
@@ -25,6 +26,40 @@ const char* LogLevel::ToString(LogLevel::Level level)
         return "UNKNOW";
     }
     return "UNKNOW";
+}
+
+void LogEvent::format(const char* fmt, ...)
+{
+    va_list al;
+    va_start(al, fmt);
+    format(fmt, al);
+    va_end(al);
+}   
+
+void LogEvent::format(const char* fmt, va_list al)
+{
+    char* buf = nullptr;
+    int len = vasprintf(&buf, fmt, al);
+    if(len != -1)
+    {
+        m_ss << std::string(buf, len);
+        free(buf);
+    }
+}
+
+LogEventWarp::LogEventWarp(LogEvent::ptr e)
+    :m_event(e)
+{
+}
+
+LogEventWarp::~LogEventWarp()
+{
+    m_event->getLogger()->log(m_event->getLevel(), m_event);
+}
+
+std::stringstream& LogEventWarp::getSS()
+{
+    return m_event->getSS();
 }
 
 class MessageFormatItem : public LogFormatter::FormatItem
@@ -74,6 +109,16 @@ public:
     void format(std::ostream& os, std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event) override
     {
         os << event->getThreadId();
+    }
+};
+
+class ThreadNameFormatItem : public LogFormatter::FormatItem
+{
+public:
+    ThreadNameFormatItem(const std::string& str = "") {}
+    void format(std::ostream& os, std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event) override
+    {
+        // TODO 输出线程名
     }
 };
 
@@ -173,9 +218,11 @@ LogAppender::~LogAppender()
 {
 }
 
-LogEvent::LogEvent(const char* file, int32_t line, uint32_t elapse,
-    uint32_t thread_id, uint32_t fiber_id, uint64_t time)
-    :m_file(file)
+LogEvent::LogEvent(std::shared_ptr<Logger> logger, LogLevel::Level level, const char* file, int32_t line,
+        uint32_t elapse, uint32_t thread_id, uint32_t fiber_id, uint64_t time)
+    :m_logger(logger)
+    ,m_level(level)
+    ,m_file(file)
     ,m_line(line)
     ,m_elapse(elapse)
     ,m_threadId(thread_id)
@@ -188,8 +235,8 @@ Logger::Logger(const std::string& name)
     :m_name(name)
     ,m_level(LogLevel::DEBUG)
 {
-    //日期 [日志级别] 文件名:行号 日志内容\n
-    m_formatter.reset(new LogFormatter("%d{%Y:%m:%d %H:%M:%S}%T[%p]%T%f:%l%T%m%T%n"));   
+    //日期\t线程id\t线程名\t协程id\t[日志级别]\t[日志名称]\t文件名:行号\t文件内容\n
+    m_formatter.reset(new LogFormatter("%d{%Y-%m-%d %H:%M:%S}%T%t%T%N%T%F%T[%p]%T[%c]%T%f:%l%T%m%n"));  
 }
 
 void Logger::addAppender(LogAppender::ptr appender)
@@ -404,7 +451,7 @@ void LogFormatter::init()
         XX(l, LineFormatItem),              //l:行号
         XX(T, TabFormatItem),               //T:Tab
         XX(F, FiberIdFormatItem),           //F:协程id
-        // XX(N, ThreadNameFormatItem),        //N:线程名称
+        XX(N, ThreadNameFormatItem),        //N:线程名称
 #undef XX
     };
 

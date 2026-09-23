@@ -9,35 +9,35 @@
 #include <fstream>
 #include <vector>
 
+// 使用流方式将日志级别level的日志写入到logger
+#define SYLAR_LOG_LEVEL(logger, level) \
+    if(logger->getLevel() <= level)  \
+        sylar::LogEventWarp(sylar::LogEvent::ptr(new sylar::LogEvent(logger, level, \
+            __FILE__, __LINE__, 0, sylar::GetThreadId(), sylar::GetFiberId(), \
+            time(0)))).getSS()
+
+#define SYLAR_LOG_DEBUG(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::DEBUG)
+#define SYLAR_LOG_INFO(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::INFO)
+#define SYLAR_LOG_WARN(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::WARN)
+#define SYLAR_LOG_ERROR(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::ERROR)
+#define SYLAR_LOG_FATAL(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::FATAL)
+
+// 使用format方式
+#define SYLAR_LOG_FMT_LEVEL(logger, level, fmt, ...) \
+    if(logger->getLevel() <= level)  \
+        sylar::LogEventWarp(sylar::LogEvent::ptr(new sylar::LogEvent(logger, level, \
+            __FILE__, __LINE__, 0, sylar::GetThreadId(), sylar::GetFiberId(), \
+            time(0)))).getEvent()->format(fmt, __VA_ARGS__)
+
+#define SYLAR_LOG_FMT_DEBUG(logger, fmt, ...) SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::DEBUG, fmt, __VA_ARGS__)
+#define SYLAR_LOG_FMT_INFO(logger, fmt, ...) SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::INFO, fmt, __VA_ARGS__)
+#define SYLAR_LOG_FMT_WARN(logger, fmt, ...) SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::WARN, fmt, __VA_ARGS__)
+#define SYLAR_LOG_FMT_ERROR(logger, fmt, ...) SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::ERROR, fmt, __VA_ARGS__)
+#define SYLAR_LOG_FMT_FATAL(logger, fmt, ...) SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::FATAL, fmt, __VA_ARGS__)
+
 namespace sylar {
 
 class Logger;
-//日志事件（感觉像是LogRecord)
-class LogEvent {
-public:
-    using ptr = std::shared_ptr<LogEvent>;
-    LogEvent(const char* file, int32_t line, uint32_t elapse,
-            uint32_t thread_id, uint32_t fiber_id, uint64_t time);
-
-    const char* getFile() const { return m_file; }
-    int32_t getLine() const { return m_line; }
-    uint32_t getElapse() const { return m_elapse; }
-    uint32_t getThreadId() const { return m_threadId; }
-    uint32_t getFiberId() const { return m_fiberId; }
-    uint64_t getTime() const { return m_time; }
-    const std::string getContent() const { return m_ss.str(); }
-
-    std::stringstream& getSS() { return m_ss; }
-private:
-    const char* m_file = nullptr;   // 文件名
-    int32_t m_line = 0;             // 行号
-    uint32_t m_elapse = 0;          // 程序启动开始到现在的毫秒数
-    uint32_t m_threadId = 0;        // 线程id
-    uint32_t m_fiberId = 0;         // 协程id
-    uint64_t m_time;                // 时间戳
-    std::stringstream m_ss;         // 日志内容
-};
-
 // 日志级别 // TODO 后期可以看看和现代C++的 enum class 的区别
 class LogLevel {
 public:
@@ -51,6 +51,50 @@ public:
     };
 
     static const char* ToString(LogLevel::Level level);
+};
+
+//日志事件（感觉像是LogRecord)
+class LogEvent {
+public:
+    using ptr = std::shared_ptr<LogEvent>;
+    LogEvent(std::shared_ptr<Logger> logger, LogLevel::Level level, const char* file, int32_t line,
+        uint32_t elapse, uint32_t thread_id, uint32_t fiber_id, uint64_t time);
+
+    const char* getFile() const { return m_file; }
+    int32_t getLine() const { return m_line; }
+    uint32_t getElapse() const { return m_elapse; }
+    uint32_t getThreadId() const { return m_threadId; }
+    uint32_t getFiberId() const { return m_fiberId; }
+    uint64_t getTime() const { return m_time; }
+    const std::string getContent() const { return m_ss.str(); }
+    std::shared_ptr<Logger> getLogger() const { return m_logger; }
+    LogLevel::Level getLevel() const { return m_level; }
+
+    std::stringstream& getSS() { return m_ss; }
+    void format(const char* fmt, ...);
+    void format(const char* fmt, va_list al);
+private:
+    const char* m_file = nullptr;   // 文件名
+    int32_t m_line = 0;             // 行号
+    uint32_t m_elapse = 0;          // 程序启动开始到现在的毫秒数
+    uint32_t m_threadId = 0;        // 线程id
+    uint32_t m_fiberId = 0;         // 协程id
+    uint64_t m_time;                // 时间戳
+    std::stringstream m_ss;         // 日志内容
+
+    std::shared_ptr<Logger> m_logger;
+    LogLevel::Level m_level;
+};
+
+class LogEventWarp {
+public:
+    LogEventWarp(LogEvent::ptr e);
+    ~LogEventWarp();
+
+    std::stringstream& getSS();
+    LogEvent::ptr getEvent() const { return m_event; }
+private:
+    LogEvent::ptr m_event;
 };
 
 //日志格式器
