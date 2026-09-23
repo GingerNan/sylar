@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 #include <sstream>
-// #include <boost/lexical_cast.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "log.h"
 
@@ -24,7 +24,7 @@ public:
 
     virtual ~ConfigVarBase() {}
 
-    const std::string getName() const { return m_name; }
+    const std::string& getName() const { return m_name; }
     const std::string& getDescription() const { return m_description; }
 
     virtual std::string toString() = 0;
@@ -66,6 +66,7 @@ public:
         try
         {
             m_val = boost::lexical_cast<T>(val);
+            return true;
         }
         catch(const std::exception& e)
         {
@@ -90,7 +91,7 @@ public:
     static typename ConfigVar<T>::ptr Lookup(const std::string& name,
         const T& default_value, const std::string& description = "")
     {
-        auto tmp = Lookup(name);
+        auto tmp = Lookup<T>(name);
         if(tmp)
         {
             SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "Lookup name=" << name << "exists";
@@ -106,6 +107,7 @@ public:
 
         typename ConfigVar<T>::ptr v(new ConfigVar<T>(name, default_value, description));
         s_datas[name] = v;
+        return v;
     }
 
     template<typename T>

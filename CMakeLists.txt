@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(sylar)
 
 set(CMAKE_VERSION_MAKEFILE ON)
-set(CMAKE_CXX_FALGS "$ENV{CXXFLAGS} -rdynamic -03 -g -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function")
+set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O3 -g -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function")
 
 set(LIB_SRC
     sylar/log.cc
@@ -24,4 +24,4 @@ add_dependencies(test_config sylar)
 target_link_libraries(test_config sylar)
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-SET(LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
+SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
