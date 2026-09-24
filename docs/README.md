@@ -14,7 +14,7 @@ lib -- 库的输出路径
 Makefile
 sylar -- 源代码路径
 tests -- 测试代码
-
+``
 ## 日志系统
 1)
     Log4J
@@ -29,7 +29,8 @@ tests -- 测试代码
 
 Config --> Yaml
 
-yamp-cpp
+boost库：sudo apt install libboost-all-dev
+yamp-cpp: sudo apt install libyaml-cpp-dev
 
 ## socket函数库
 

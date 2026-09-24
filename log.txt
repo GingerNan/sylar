@@ -1,0 +1,2 @@
+2026:09:24 17:18:31	[ERROR]	test macor error
+2026:09:24 17:18:31	[ERROR]	str:test macro, val=2
