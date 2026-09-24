@@ -129,6 +129,13 @@ public:
     int m_age = 0;
     bool m_sex = 0;
 
+    bool operator==(const Person& other) const
+    {
+        return m_name == other.m_name &&
+            m_age == other.m_age &&
+            m_sex == other.m_sex;
+    }
+
     std::string toString() const {
         std::stringstream ss;
         ss << "[Person name=" << m_name << " age=" << m_age
@@ -193,6 +200,11 @@ void test_class()
         } \
         SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << #prefix << ": size=" << m.size(); \
     }
+
+    g_person->addListener(10, [](const Person& old_value, const Person& new_value){
+        SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "old_value" << old_value.toString()
+            << " new_value" << new_value.toString();
+    });
 
     XX_MP(g_person_map, "class.person_map before");
     SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "g_person_vec_map before: " << g_person_vec_map->toString();
