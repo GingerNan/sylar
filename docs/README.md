@@ -25,12 +25,33 @@ tests -- 测试代码
         |
     Appender（日志输出地方）
 
-## 协程库封装
+## 配置系统
 
 Config --> Yaml
 
-boost库：sudo apt install libboost-all-dev
-yamp-cpp: sudo apt install libyaml-cpp-dev
+- boost库：sudo apt install libboost-all-dev
+- yamp-cpp: sudo apt install libyaml-cpp-dev
+
+
+配置系统的原则，约定优于配置
+```cpp
+template<T, FormStr, ToStr>
+class ConfigVar;
+
+template<F, T>
+LexicalCast;
+
+//容器特例化，目前支持 vector、list、set、map、unordered_map、unordered_set
+// Config::Lookup(key)，key相同，类型不同的，不会由报错
+
+```
+
+自定义类型，需要实现sylar::LexicalCast，特例化实现后，可以支持Config解析
+自定义类型，自定义类型可以和常规stl容器一起使用
+
+配置的事件机制 当一个配置项发生修改的时候，可以反向通知对应的代码，回调
+
+## 协程库封装
 
 ## socket函数库
 
