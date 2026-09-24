@@ -44,7 +44,7 @@
 namespace sylar {
 
 class Logger;
-// 日志级别 // TODO 后期可以看看和现代C++的 enum class 的区别
+// 日志级别
 class LogLevel {
 public:
     enum Level {
@@ -138,11 +138,10 @@ public:
     void setFormatter(LogFormatter::ptr val) { m_formatter = val; }
     LogFormatter::ptr getFormatter() const { return m_formatter; }
 
-    //TODO 这个的level好像不确定
     LogLevel::Level getLevel() const { return m_level; }
     void setLevel(LogLevel::Level val) { m_level = val; }
 protected:
-    LogLevel::Level m_level;
+    LogLevel::Level m_level = LogLevel::DEBUG;
     LogFormatter::ptr m_formatter;
 };
 

@@ -7,9 +7,7 @@
 int main(int argc, char** argv)
 {
     sylar::Logger::ptr logger(new sylar::Logger);
-    sylar::LogAppender::ptr stdout_appender(new sylar::StdoutLogAppender);
-    stdout_appender->setLevel(sylar::LogLevel::DEBUG);
-    logger->addAppender(stdout_appender);
+    logger->addAppender(sylar::LogAppender::ptr(new sylar::StdoutLogAppender));
 
     sylar::FileLogAppender::ptr file_appender(new sylar::FileLogAppender("./log.txt"));
     logger->addAppender(file_appender);
