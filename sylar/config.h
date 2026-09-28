@@ -369,8 +369,8 @@ public:
     static typename ConfigVar<T>::ptr Lookup(const std::string& name,
         const T& default_value, const std::string& description = "")
     {
-        auto it = s_datas.find(name);
-        if(it != s_datas.end())
+        auto it = GetDatas().find(name);
+        if(it != GetDatas().end())
         {
             auto tmp = std::dynamic_pointer_cast<ConfigVar<T>>(it->second);
             if(tmp)
@@ -380,7 +380,7 @@ public:
             }
             else
             {
-                SYLAR_LOG_ERROR(SYLAR_LOG_ROOT()) << "Lookup name=" << name << "exists but type not "
+                SYLAR_LOG_ERROR(SYLAR_LOG_ROOT()) << "Lookup name=" << name << " exists but type not "
                     << typeid(T).name() << " real_type=" << it->second->getTypeName()
                     << " " << it->second->toString();
                 return nullptr;
@@ -395,15 +395,15 @@ public:
         }
 
         typename ConfigVar<T>::ptr v(new ConfigVar<T>(name, default_value, description));
-        s_datas[name] = v;
+        GetDatas()[name] = v;
         return v;
     }
 
     template<typename T>
     static typename ConfigVar<T>::ptr Lookup(const std::string& name)
     {
-        auto it = s_datas.find(name);
-        if(it == s_datas.end())
+        auto it = GetDatas().find(name);
+        if(it == GetDatas().end())
         {
             return nullptr;
         }
@@ -413,7 +413,11 @@ public:
     static void LoadFromYaml(const YAML::Node& root);
     static ConfigVarBase::ptr LookupBase(const std::string& name);
 private:
-    static ConfigVarMap s_datas;
+    static ConfigVarMap& GetDatas()
+    {
+        static ConfigVarMap s_datas;
+        return s_datas;
+    }
 };
 
 } // namespace sylar
