@@ -12,6 +12,7 @@
 
 #include "util.h"
 #include "singleton.h"
+#include "thread.h"
 
 // 使用流方式将日志级别level的日志写入到logger
 #define SYLAR_LOG_LEVEL(logger, level) \
@@ -147,13 +148,14 @@ public:
     virtual std::string toYamlString() = 0;
 
     void setFormatter(LogFormatter::ptr val);
-    LogFormatter::ptr getFormatter() const { return m_formatter; }
+    LogFormatter::ptr getFormatter();
 
     LogLevel::Level getLevel() const { return m_level; }
     void setLevel(LogLevel::Level val) { m_level = val; }
 protected:
     LogLevel::Level m_level = LogLevel::DEBUG;
     bool m_hasFormatter = false;
+    Mutex m_mutex;
     LogFormatter::ptr m_formatter;
 };
 
@@ -183,12 +185,13 @@ public:
 
     void setFormatter(LogFormatter::ptr val);
     void setFormatter(const std::string& val);
-    LogFormatter::ptr getFormatter() const;
+    LogFormatter::ptr getFormatter();
 
     std::string toYamlString();
 private:
     std::string m_name;         // 日志名称
     LogLevel::Level m_level;    // 日志级别（满足该设置的level才能输出日志）
+    Mutex m_mutex;
     std::list<LogAppender::ptr> m_appenders;     // Appender集合
     LogFormatter::ptr m_formatter;
     Logger::ptr m_root;
@@ -230,6 +233,7 @@ public:
 
     std::string toYamlString();
 private:
+    Mutex m_mutex;
     std::map<std::string, Logger::ptr> m_loggers;
     Logger::ptr m_root;
 };

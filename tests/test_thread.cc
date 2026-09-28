@@ -4,6 +4,10 @@
 
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 
+int count = 0;
+// sylar::RWMutex s_mutex;
+sylar::Mutex s_mutex;
+
 void fun1()
 {
     SYLAR_LOG_INFO(g_logger) << "name: " << sylar::Thread::GetName()
@@ -11,7 +15,11 @@ void fun1()
         << " id: " << sylar::GetThreadId()
         << " this.id: " << sylar::Thread::GetThis()->getId();
     
-    sleep(20);
+    for(int i = 0; i < 100000; ++i)
+    {
+        sylar::Mutex::Lock lock(s_mutex);
+        ++count;
+    }
 }
 
 void fun2()
@@ -32,5 +40,8 @@ int main(int argc, char** argv)
     {
         thrs[i]->join();
     }
-    SYLAR_LOG_INFO(g_logger) << "thread test end";
+    SYLAR_LOG_INFO(g_logger) << "thread test end" << std::endl;
+
+    SYLAR_LOG_INFO(g_logger) << "count=" << count;
+    return 0;
 }
