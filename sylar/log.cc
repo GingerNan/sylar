@@ -271,7 +271,7 @@ void LogAppender::setFormatter(LogFormatter::ptr val)
     }
 }
 
-LogFormatter::ptr LogAppender::getFormatter()
+LogFormatter::ptr LogAppender::getFormatter() const
 {
     MutexType::Lock lock(m_mutex);
     return m_formatter;
@@ -344,7 +344,7 @@ void Logger::setFormatter(const std::string& val)
     setFormatter(new_val);
 }
 
-LogFormatter::ptr Logger::getFormatter()
+LogFormatter::ptr Logger::getFormatter() const
 {
     MutexType::Lock lock(m_mutex);
     return m_formatter;
@@ -845,7 +845,7 @@ public:
 struct LogIniter{
     LogIniter()
     {
-        g_log_defines->addListener(0xF1E231, [](
+        g_log_defines->addListener([](
             const std::set<LogDefine>& old_value,
             const std::set<LogDefine>& new_value
         ){

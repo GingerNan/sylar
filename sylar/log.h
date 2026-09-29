@@ -150,14 +150,14 @@ public:
     virtual std::string toYamlString() = 0;
 
     void setFormatter(LogFormatter::ptr val);
-    LogFormatter::ptr getFormatter();
+    LogFormatter::ptr getFormatter() const;
 
     LogLevel::Level getLevel() const { return m_level; }
     void setLevel(LogLevel::Level val) { m_level = val; }
 protected:
     LogLevel::Level m_level = LogLevel::DEBUG;
     bool m_hasFormatter = false;
-    MutexType m_mutex;
+    mutable MutexType m_mutex;
     LogFormatter::ptr m_formatter;
 };
 
@@ -188,13 +188,13 @@ public:
 
     void setFormatter(LogFormatter::ptr val);
     void setFormatter(const std::string& val);
-    LogFormatter::ptr getFormatter();
+    LogFormatter::ptr getFormatter() const;
 
     std::string toYamlString();
 private:
     std::string m_name;         // 日志名称
     LogLevel::Level m_level;    // 日志级别（满足该设置的level才能输出日志）
-    MutexType m_mutex;
+    mutable MutexType m_mutex;
     std::list<LogAppender::ptr> m_appenders;     // Appender集合
     LogFormatter::ptr m_formatter;
     Logger::ptr m_root;
