@@ -72,6 +72,14 @@ logs:
 定义协程接口 ucontext_t.
 macro
 
+```
+Thread->main_fiber <------> sub_fiber
+            |
+            |
+            v
+        sub_fiber
+```
+
 ## socket函数库
 
 ## http协议开发
