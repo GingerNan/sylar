@@ -1,11 +1,11 @@
 #include "log.h"
+#include "config.h"
 
 #include <iostream>
 #include <map>
 #include <functional>
 #include <cstdarg>
 
-#include "config.h"
 
 namespace sylar {
 
