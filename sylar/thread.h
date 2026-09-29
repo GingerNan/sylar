@@ -171,6 +171,15 @@ private:
     pthread_mutex_t m_mutex;
 };
 
+class NullMutex {
+public:
+    using Lock = ScopedLockImpl<NullMutex>;
+    NullMutex() {}
+    ~NullMutex() {}
+    void lock() {}
+    void unlock() {}
+};
+
 class RWMutex
 {
 public:
@@ -205,6 +214,19 @@ private:
     pthread_rwlock_t m_lock;
 };
 
+
+class NullRWMutex {
+public:
+    using ReadLock = ReadScopedLockImpl<NullRWMutex>;
+    using WriteLock = WriteScopedLockImpl<NullRWMutex>; 
+
+    NullRWMutex() {}
+    ~NullRWMutex() {}
+
+    void rdlock() {}
+    void wrlock() {}
+    void unlock() {}
+};
 
 class Thread
 {
