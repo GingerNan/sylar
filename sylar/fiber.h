@@ -45,9 +45,9 @@ public:
     static void SetThis(Fiber* f);
     // 返回当前协程
     static Fiber::ptr GetThis();
-    // 协程切换到后台，并且设置为Ready状态
+    // 协程切换到后台，并且设置为Ready可执行状态
     static void YeildToReady();
-    // 协程切换到后台，并且设置为Hold状态
+    // 协程切换到后台，并且设置为Hold暂停状态
     static void YeildToHold();
     // 总协程数
     static uint64_t TotalFibers();

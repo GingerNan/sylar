@@ -9,10 +9,10 @@
 namespace sylar
 {
 
-// 返回当前线程的Id
+// 获取当前线程的Id
 pid_t GetThreadId();
 
-// 返回当前协程的Id
+// 获取当前协程的Id
 uint32_t GetFiberId();
 
 // 获取栈信息

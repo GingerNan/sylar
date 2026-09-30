@@ -19,7 +19,7 @@
     if(logger->getLevel() <= level)  \
         sylar::LogEventWarp(sylar::LogEvent::ptr(new sylar::LogEvent(logger, level, \
             __FILE__, __LINE__, 0, sylar::GetThreadId(), sylar::GetFiberId(), \
-            time(0)))).getSS()
+            time(0), sylar::Thread::GetName()))).getSS()
 
 #define SYLAR_LOG_DEBUG(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::DEBUG)
 #define SYLAR_LOG_INFO(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::INFO)
@@ -32,7 +32,7 @@
     if(logger->getLevel() <= level)  \
         sylar::LogEventWarp(sylar::LogEvent::ptr(new sylar::LogEvent(logger, level, \
             __FILE__, __LINE__, 0, sylar::GetThreadId(), sylar::GetFiberId(), \
-            time(0)))).getEvent()->format(fmt, __VA_ARGS__)
+            time(0), sylar::Thread::GetName()))).getEvent()->format(fmt, __VA_ARGS__)
 
 #define SYLAR_LOG_FMT_DEBUG(logger, fmt, ...) SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::DEBUG, fmt, __VA_ARGS__)
 #define SYLAR_LOG_FMT_INFO(logger, fmt, ...) SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::INFO, fmt, __VA_ARGS__)
@@ -69,7 +69,8 @@ class LogEvent {
 public:
     using ptr = std::shared_ptr<LogEvent>;
     LogEvent(std::shared_ptr<Logger> logger, LogLevel::Level level, const char* file, int32_t line,
-        uint32_t elapse, uint32_t thread_id, uint32_t fiber_id, uint64_t time);
+        uint32_t elapse, uint32_t thread_id, uint32_t fiber_id, uint64_t time,
+        const std::string& thread_name);
 
     const char* getFile() const { return m_file; }
     int32_t getLine() const { return m_line; }
@@ -80,6 +81,7 @@ public:
     const std::string getContent() const { return m_ss.str(); }
     std::shared_ptr<Logger> getLogger() const { return m_logger; }
     LogLevel::Level getLevel() const { return m_level; }
+    const std::string& getThreadName() const { return m_threadName; }
 
     std::stringstream& getSS() { return m_ss; }
     void format(const char* fmt, ...);
@@ -91,6 +93,8 @@ private:
     uint32_t m_threadId = 0;        // 线程id
     uint32_t m_fiberId = 0;         // 协程id
     uint64_t m_time;                // 时间戳
+    std::string m_threadName;       // 线程名称
+
     std::stringstream m_ss;         // 日志内容
 
     std::shared_ptr<Logger> m_logger;
