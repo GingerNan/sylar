@@ -12,6 +12,7 @@ set(LIB_SRC
     sylar/config.cc
     sylar/fiber.cc
     sylar/log.cc
+    sylar/mutex.cc
     sylar/thread.cc
     sylar/util.cc
 )
