@@ -2,6 +2,7 @@
 #include "config.h"
 #include "macro.h"
 #include "log.h"
+#include "scheduler.h"
 
 #include <atomic>
 
@@ -91,19 +92,24 @@ void Fiber::MainFunc()
     catch(std::exception& ex)
     {
         cur->m_state = EXCEPT;
-        SYLAR_LOG_ERROR(g_logger) << "Fiber Exception: " << ex.what();
+        SYLAR_LOG_ERROR(g_logger) << "Fiber Exception: " << ex.what()
+            << " fiber_id=" << cur->getId()
+            << std::endl
+            << sylar::BacktraceToString();
     }
     catch(...)
     {
         cur->m_state = EXCEPT;
-        SYLAR_LOG_ERROR(g_logger) << "Fiber Exception";
+        SYLAR_LOG_ERROR(g_logger) << "Fiber Exception"
+            << std::endl
+            << sylar::BacktraceToString();
     }
 
     auto raw_ptr = cur.get();
     cur.reset();
     raw_ptr->swapOut();
 
-    SYLAR_ASSERT2(false, "nerver reach");
+    SYLAR_ASSERT2(false, "nerver reach fiber_id=" + std::to_string(raw_ptr->getId()));
 }
 
 Fiber::Fiber()
@@ -186,10 +192,9 @@ void Fiber::reset(std::function<void()> cb)
     m_state = INIT;
 }
 
-void Fiber::swapIn()
+void Fiber::call()
 {
     SetThis(this);
-    SYLAR_ASSERT(m_state != EXEC);
 
     m_state = EXEC;
     if(swapcontext(&t_threadFiber->m_ctx, &m_ctx))
@@ -198,11 +203,23 @@ void Fiber::swapIn()
     }
 }
 
+void Fiber::swapIn()
+{
+    SetThis(this);
+    SYLAR_ASSERT(m_state != EXEC);
+
+    m_state = EXEC;
+    if(swapcontext(&Scheduler::GetMainFiber()->m_ctx, &m_ctx))
+    {
+        SYLAR_ASSERT2(false, "swapcontext");
+    }
+}
+
 void Fiber::swapOut()
 {
-    SetThis(t_threadFiber.get());
+    SetThis(Scheduler::GetMainFiber());
 
-    if(swapcontext(&m_ctx, &t_threadFiber->m_ctx))
+    if(swapcontext(&m_ctx, &Scheduler::GetMainFiber()->m_ctx))
     {
         SYLAR_ASSERT2(false, "swapcontext");
     }

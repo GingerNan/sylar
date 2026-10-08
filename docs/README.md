@@ -88,6 +88,21 @@ scheduler --> thread --> fiber
 2. 协程调度器，将协程，指定到相应的线程上去执行
 
 N : M
+
+m_threads
+<function<void()>, fiber, threadid> m_fibers;
+
+schedule(func/fiber)
+
+start()
+stop()
+run()
+
+1.设置当前线程的scheduler
+2.设置当前线程的run，fiber
+3.协程调度循环while(true)
+    1.协程消息队列里面是否有任务
+    2.无任务执行，执行idle
 ```
 
 ## socket函数库
