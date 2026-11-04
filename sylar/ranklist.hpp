@@ -2,7 +2,9 @@
 #define __SYLAR_RANKLIST_H__
 
 #include <cstddef>
+#include <cstdint>
 #include <unordered_map>
+#include <utility>
 
 #include "log.h"
 #include "skiplist.hpp"
@@ -13,8 +15,8 @@ struct RankContext
     K uid_;
     V score_;
 
-    RankContext() {}
-    RankContext(const K& uid, const V& socre) : uid_(uid), socre_(score){}
+    RankContext() : uid_(), score_() {}
+    RankContext(const K& uid, const V& score) : uid_(uid), score_(score) {}
 };
 
 template <typename K, typename V, typename Callable>
@@ -25,7 +27,7 @@ struct RankCompare
 
     RankCompare(const Callable& cb, bool order = true) : cb_(std::move(const_cast<Callable&>(cb))), order_(order) {}
 
-    int operator()(const RankContext<K, v>& lhs, const RankContext<K, V>& rhs) const {
+    int operator()(const RankContext<K, V>& lhs, const RankContext<K, V>& rhs) const {
 		ptrdiff_t diff = (const char*)&lhs - (const char*)&rhs;
 		if (diff == 0) {
 			return 0;
@@ -71,7 +73,7 @@ public:
     };
 
 public:
-    explicit RankList(const Comparator& cmp);
+    explicit RankList(const Comparator& cmp, bool order = true);
     ~RankList();
 
     int Insert(const K& uid, const V& score);
@@ -116,7 +118,7 @@ private:
 };
 
 template <typename K, typename V, typename Comparator>
-RankList<K, V, Comparator>::RankList(const Comparator& cmp)
+RankList<K, V, Comparator>::RankList(const Comparator& cmp, bool order)
 : Super(RankCompare<K, V, Comparator>(cmp, order))
 {
 }
@@ -149,9 +151,9 @@ int RankList<K, V, Comparator>::Update(const K& uid, const V& score)
     }
 
     auto node = it->second;
-    Super::Delete(node);
+    Super::Detele(node);
 
-    node->data.score_ = std::move(score);
+    node->data.score_ = score;
     Super::Insert(node);
 
     return 0;
@@ -168,7 +170,7 @@ int RankList<K, V, Comparator>::Delete(const K& uid)
     auto node = it->second;
     node_list_.erase(it);
 
-    Super::Delete(node);
+    Super::Detele(node);
     delete node;
     return 0;
 }
@@ -183,7 +185,7 @@ bool RankList<K, V, Comparator>::Contain(const K& uid)
 template <typename K, typename V, typename Comparator>
 uint64_t RankList<K, V, Comparator>::GetByRank(int rank)
 {
-    if (rank <= 0 || rank >= GetSize())
+    if (rank <= 0 || rank > GetSize())
     {
         return 0;
     }
@@ -233,8 +235,8 @@ uint64_t RankList<K, V, Comparator>::DelByRank(int rank)
         return 0;
     }
 
-    auto node = it.GetNode();
-    if (Super::Delete(node) < 0)
+    Node* node = const_cast<Node*>(it.GetNode());
+    if (Super::Detele(node) < 0)
     {
         SYLAR_LOG_ERROR(SYLAR_LOG_ROOT()) << "compare function implementation maybe error";
         return -1;
@@ -274,7 +276,9 @@ int RankList<K, V, Comparator>::DeleteByRankRange(int min, int max)
 	p = p->level_[0].next_;
 	while (p && traversed <= max) {
 		Node* next = p->level_[0].next_;
-		this->Super::Delete(p->data);
+		node_list_.erase(p->data.uid_);
+		Super::Detele(p);
+		delete p;
 		traversed++;
 		removed++;
 		p = next;
@@ -313,8 +317,8 @@ template <typename K, typename V, typename Comparator>
 int RankList<K, V, Comparator>::GetRank(const V& score)
 {
     int traversed = 0;
-    Node* p = head_;
-    for (int level = GetMaxHeight() - 1; level >= 0; level--)
+	Node* p = this->head_;
+	for (int level = this->GetMaxHeight() - 1; level >= 0; level--)
     {
         while (p->level_[level].next_ && p->level_[level].next_->data.score_ <= score)
         {
@@ -352,8 +356,8 @@ void RankList<K, V, Comparator>::Dump()
 template <typename K, typename V, typename Comparator>
 typename RankList<K, V, Comparator>::Node* RankList<K, V, Comparator>::FindGreaterOrEqual(const V& score) const
 {
-    Node* node = this->head_;
-    for (int level = GetMaxHeight() -1; level >= 0; level--)
+    Node* p = this->head_;
+    for (int level = this->GetMaxHeight() - 1; level >= 0; level--)
     {
         while (p->level_[level].next_ && p->level_[level].next_->data.score_ < score)
         {
@@ -367,9 +371,9 @@ template <typename K, typename V, typename Comparator>
 typename RankList<K, V, Comparator>::Node* RankList<K, V, Comparator>::FindLessOrEqual(const V& score) const
 {
     Node* p = this->head_;
-    for (int level = GetMaxHeight() - 1; level >= 0; level--)
+    for (int level = this->GetMaxHeight() - 1; level >= 0; level--)
     {
-        while (p->level_[level].next_ && p->level_[level].next_.data.score_ <= score)
+        while (p->level_[level].next_ && p->level_[level].next_->data.score_ <= score)
         {
 			p = p->Next(level);
 		}

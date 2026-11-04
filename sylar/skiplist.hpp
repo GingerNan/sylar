@@ -1,6 +1,10 @@
 #ifndef __SYLAR_SKIPLIST_H__
 #define __SYLAR_SKIPLIST_H__
 
+#include <cstdlib>
+#include <new>
+#include <utility>
+
 #include "macro.h"
 
 /**
@@ -78,7 +82,7 @@ public:
     Node* CtorNode(Args&& ...args)
     {
         int height = RandomHeight();
-        const char* node_memory = (char*)malloc(sizeof(Node) + sizeof(typename Node::LevelContext) * (height - 1))
+        char* node_memory = (char*)malloc(sizeof(Node) + sizeof(typename Node::LevelContext) * (height - 1));
         return new (node_memory) Node(height, std::forward<Args>(args)...);
     }
 
@@ -112,7 +116,7 @@ public:
     Node* FindByRank(int rank) const;
 
 protected:
-    inline constexpr int kMaxHeight = 32;       // 跳表最大层数
+    static constexpr int kMaxHeight = 32;       // 跳表最大层数
 
     inline int GetMaxHeight() const { return max_height_; }
 
@@ -120,7 +124,7 @@ protected:
 
     // 创建一个新的 Node 节点
     Node* NewNode(int height, const Data& data) {
-        const char* node_memory = (char*)malloc(sizeof(Node) + sizeof(typename SkipList<Data, Comparator>::Node::LevelContext) * (height - 1));
+        char* node_memory = (char*)malloc(sizeof(Node) + sizeof(typename SkipList<Data, Comparator>::Node::LevelContext) * (height - 1));
         return new (node_memory) Node(height, data);
     }
 
@@ -128,14 +132,14 @@ protected:
 
     bool KeyIsAfterNode(const Data& data, Node* n) const;
 
-    Node* FindGreaterOrEqual(const Data& data, Node* prev, int* rank = nullptr) const;
+    Node* FindGreaterOrEqual(const Data& data, Node** prev, int* rank = nullptr) const;
     Node* FindLessThan(const Data& data) const;
     Node* FindLast() const;
 
 protected:
     const Comparator compare_;      // 比较器
 
-    const Node* head_;              // 头节点
+    Node* head_;                    // 头节点
     Node* tail_;
 
     int max_height_;
@@ -176,7 +180,7 @@ struct SkipList<Data, Comparator>::Node
     }
 
     void SetNext(int n, Node* x) {
-        SYLAR_ASSERT(n > = 0);
+        SYLAR_ASSERT(n >= 0);
         level_[n].next_ = x;
     }
 
@@ -261,14 +265,14 @@ inline void SkipList<Data, Comparator>::Iterator::SeekByRank(int rank)
 }
 
 template <typename Data, class Comparator>
-inline SkipList<Data, Comparator>::Iterator& SkipList<Data, Comparator>::Iterator::operator++()
+inline typename SkipList<Data, Comparator>::Iterator& SkipList<Data, Comparator>::Iterator::operator++()
 {
     Next();
     return *this;
 }
        
 template <typename Data, class Comparator>
-inline SkipList<Data, Comparator>::Iterator& SkipList<Data, Comparator>::Iterator::operator++(int)
+inline typename SkipList<Data, Comparator>::Iterator& SkipList<Data, Comparator>::Iterator::operator++(int)
 {
     Next();
     return *this;
@@ -311,7 +315,7 @@ bool SkipList<Data, Comparator>::KeyIsAfterNode(const Data& data, Node* n) const
  * rank 这里rank是数组
  */
 template <typename Data, class Comparator>
-typename SkipList<Data, Comparator>::Node* SkipList<Data, Comparator>::FindGreaterOrEqual(const Data& data, Node* prev, int* rank) const
+typename SkipList<Data, Comparator>::Node* SkipList<Data, Comparator>::FindGreaterOrEqual(const Data& data, Node** prev, int* rank) const
 {
     Node* cur = head_;
     for (int level = GetMaxHeight() - 1; level >= 0; level--)
@@ -320,7 +324,7 @@ typename SkipList<Data, Comparator>::Node* SkipList<Data, Comparator>::FindGreat
             rank[level] = level == (GetMaxHeight() - 1) ? 0 : rank[level + 1];
         }
 
-        while (KeyIsAfterNode(data, x->Next(level)))
+        while (KeyIsAfterNode(data, cur->Next(level)))
         {
             if (rank) {
                 rank[level] += cur->level_[level].span_;
@@ -329,10 +333,10 @@ typename SkipList<Data, Comparator>::Node* SkipList<Data, Comparator>::FindGreat
         }
 
         if (prev) {
-            prev[level] = x;
+            prev[level] = cur;
         }
     }
-    return x;
+    return cur->Next(0);
 }
     
 template <typename Data, class Comparator>
@@ -342,14 +346,14 @@ typename SkipList<Data, Comparator>::Node* SkipList<Data, Comparator>::FindLessT
     int level = GetMaxHeight() - 1;
     while (true)
     {
-        SYLAR_ASSERT(cur == head_ || compare_(x->data, data) < 0);
-        Node* next = x->Next(level);
+        SYLAR_ASSERT(cur == head_ || compare_(cur->data, data) < 0);
+        Node* next = cur->Next(level);
 
-        if (next == nullptr || compare_(next->data, data) > = 0)
+        if (next == nullptr || compare_(next->data, data) >= 0)
         {
             if (level == 0)
             {
-                return x
+                return cur;
             }
             else
             {
@@ -358,7 +362,7 @@ typename SkipList<Data, Comparator>::Node* SkipList<Data, Comparator>::FindLessT
         } 
         else
         {
-            x = next;
+            cur = next;
         }
     }
 }
@@ -396,7 +400,7 @@ SkipList<Data, Comparator>::SkipList(const Comparator& cmp)
 , head_(NewNode(kMaxHeight, Data()))
 , tail_(nullptr)
 , max_height_(1)
-, size(0)
+, size_(0)
 {
     for (int i = 0; i < kMaxHeight; i++) {
         head_->SetNext(i, nullptr);
@@ -432,12 +436,12 @@ void SkipList<Data, Comparator>::Insert(SkipList<Data, Comparator>::Node* node)
         {
             rank[i] = 0;
             prev[i] = head_;
-            prev[i].level[i].span_ = size_;
+            prev[i]->level_[i].span_ = size_;
         }
         max_height_ = height;
     }
 
-    for (int i = 0; i < hegith; i++)
+    for (int i = 0; i < height; i++)
     {
         node->SetNext(i, prev[i]->Next(i));
         prev[i]->SetNext(i, node);
@@ -463,11 +467,10 @@ void SkipList<Data, Comparator>::Insert(SkipList<Data, Comparator>::Node* node)
 }
 
 template <typename Data, class Comparator>
-int SkipList<Data, Comparator>::Delete(const Data& data, bool dtor = true)
+int SkipList<Data, Comparator>::Delete(const Data& data, bool dtor)
 {
     Node* prev[kMaxHeight];
     Node* node = FindGreaterOrEqual(data, prev);
-    node = node->level_[0].next_;
     if (node && Equal(data, node->data))
     {
         for (int i = 0; i < max_height_; ++i)
@@ -479,20 +482,20 @@ int SkipList<Data, Comparator>::Delete(const Data& data, bool dtor = true)
             }
             else
             {
-                prev[i]->level_[i].span -= 1;
+                prev[i]->level_[i].span_ -= 1;
             }
         }
 
         if (node->level_[0].next_ != nullptr)
         {
-            node->level_[0].next_->prev = node->prev_;
+            node->level_[0].next_->prev_ = node->prev_;
         }
         else
         {
             tail_ = node->prev_;
         }
 
-        while (max_height_ > 1 && head_->level_[max_height_ - 1].next == nullptr)
+        while (max_height_ > 1 && head_->level_[max_height_ - 1].next_ == nullptr)
         {
             max_height_--;
         }
@@ -518,7 +521,7 @@ template <typename Data, class Comparator>
 bool SkipList<Data, Comparator>::Contains(const Data& data) const
 {
     Node* node = FindGreaterOrEqual(data, nullptr);
-    if (x != nullptr && Equal(data, x->data))
+    if (node != nullptr && Equal(data, node->data))
     {
         return true;
     }
@@ -529,11 +532,11 @@ bool SkipList<Data, Comparator>::Contains(const Data& data) const
 }
 
 template <typename Data, class Comparator>
-SkipList<Data, Comparator>::Node* SkipList<Data, Comparator>::FindByRank(int rank) const
+typename SkipList<Data, Comparator>::Node* SkipList<Data, Comparator>::FindByRank(int rank) const
 {
     int traversed = 0;  // 穿过
     Node* p = head_;
-    for (int level = GetMaxHeight() - 1; level > = 0; level--)
+    for (int level = GetMaxHeight() - 1; level >= 0; level--)
     {
         while (p->Next(level) && p->Span(level) + traversed <= rank)
         {
