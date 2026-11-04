@@ -67,5 +67,10 @@ add_dependencies(test_scheduler sylar)
 force_redefine_file_macro_for_sources(test_scheduler)  #__FILE__
 target_link_libraries(test_scheduler sylar)
 
+add_executable(test_ranklist tests/test_ranklist.cc)
+add_dependencies(test_ranklist sylar)
+force_redefine_file_macro_for_sources(test_ranklist)  #__FILE__
+target_link_libraries(test_ranklist sylar)
+
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
