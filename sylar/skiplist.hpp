@@ -130,10 +130,14 @@ protected:
 
     int RandomHeight();
 
+    // 判断节点 n 是否排在查找键 data 之前
     bool KeyIsAfterNode(const Data& data, Node* n) const;
 
+    // 在跳表中查找第一个键位 >= data 的节点
     Node* FindGreaterOrEqual(const Data& data, Node** prev, int* rank = nullptr) const;
+    // 找到 data 之前的一个节点
     Node* FindLessThan(const Data& data) const;
+    // 返回跳表的最后一个节点
     Node* FindLast() const;
 
 protected:
@@ -311,9 +315,6 @@ bool SkipList<Data, Comparator>::KeyIsAfterNode(const Data& data, Node* n) const
     return (n != nullptr) && (compare_(n->data, data) < 0);
 }
 
-/**
- * rank 这里rank是数组
- */
 template <typename Data, class Comparator>
 typename SkipList<Data, Comparator>::Node* SkipList<Data, Comparator>::FindGreaterOrEqual(const Data& data, Node** prev, int* rank) const
 {

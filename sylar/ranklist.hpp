@@ -23,8 +23,9 @@ template <typename K, typename V, typename Callable>
 struct RankCompare
 {
     Callable cb_;   // 回调函数
-    bool order_;
+    bool order_;    // true 表示升序，false 表示降序
 
+    // order 默认为升序排列，
     RankCompare(const Callable& cb, bool order = true) : cb_(std::move(const_cast<Callable&>(cb))), order_(order) {}
 
     int operator()(const RankContext<K, V>& lhs, const RankContext<K, V>& rhs) const {
@@ -73,6 +74,7 @@ public:
     };
 
 public:
+    // order 默认是升序排列，第一名在默认，要改成降序order传false
     explicit RankList(const Comparator& cmp, bool order = true);
     ~RankList();
 
@@ -132,7 +134,7 @@ template <typename K, typename V, typename Comparator>
 int RankList<K, V, Comparator>::Insert(const K& uid, const V& score)
 {
     auto it = node_list_.find(uid);
-    if (it != node_list_.end()) {
+    if (it != node_list_.end()) {       // 当 it != node_list_.end() 时，表示该 uid 已经在该排行榜中
         return -1;
     }
 
