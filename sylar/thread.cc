@@ -21,7 +21,7 @@ const std::string& Thread::GetName()
 
 void Thread::SetName(const std::string& name)
 {
-    if(t_thread)
+    if (t_thread)
     {
         t_thread->m_name = name;
     }
@@ -33,7 +33,7 @@ Thread::Thread(std::function<void()> cb, const std::string& name)
     , m_name(name.empty() ? "UNKNOW" : name)
 {
     int rt = pthread_create(&m_thread, nullptr, &Thread::run, this);
-    if(rt)
+    if (rt)
     {
         SYLAR_LOG_ERROR(g_logger) << "pthread_create thread fail, rt=" << rt
             << " name=" << name;
@@ -45,7 +45,7 @@ Thread::Thread(std::function<void()> cb, const std::string& name)
 
 Thread::~Thread()
 {
-    if(m_thread)
+    if (m_thread)
     {
         pthread_detach(m_thread);
     }
@@ -70,10 +70,10 @@ void* Thread::run(void* arg)
 
 void Thread::join()
 {
-    if(m_thread)
+    if (m_thread)
     {
         int rt = pthread_join(m_thread, nullptr);
-        if(rt)
+        if (rt)
         {
             SYLAR_LOG_ERROR(g_logger) << "pthread_join thread fail, rt=" << rt
                 << " name=" << m_name;

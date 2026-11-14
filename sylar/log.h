@@ -16,7 +16,7 @@
 
 // 使用流方式将日志级别level的日志写入到logger
 #define SYLAR_LOG_LEVEL(logger, level) \
-    if(logger->getLevel() <= level)  \
+    if (logger->getLevel() <= level)  \
         sylar::LogEventWarp(sylar::LogEvent::ptr(new sylar::LogEvent(logger, level, \
             __FILE__, __LINE__, 0, sylar::GetThreadId(), sylar::GetFiberId(), \
             time(0), sylar::Thread::GetName()))).getSS()
@@ -29,7 +29,7 @@
 
 // 使用format方式
 #define SYLAR_LOG_FMT_LEVEL(logger, level, fmt, ...) \
-    if(logger->getLevel() <= level)  \
+    if (logger->getLevel() <= level)  \
         sylar::LogEventWarp(sylar::LogEvent::ptr(new sylar::LogEvent(logger, level, \
             __FILE__, __LINE__, 0, sylar::GetThreadId(), sylar::GetFiberId(), \
             time(0), sylar::Thread::GetName()))).getEvent()->format(fmt, __VA_ARGS__)

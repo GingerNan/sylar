@@ -15,7 +15,7 @@ void fun1()
         << " id: " << sylar::GetThreadId()
         << " this.id: " << sylar::Thread::GetThis()->getId();
     
-    for(int i = 0; i < 100000; ++i)
+    for (int i = 0; i < 100000; ++i)
     {
         sylar::Mutex::Lock lock(s_mutex);
         ++count;
@@ -45,7 +45,7 @@ int main(int argc, char** argv)
     sylar::Config::LoadFromYaml(root);
 
     std::vector<sylar::Thread::ptr> thrs;
-    for(int i = 0; i < 2; ++i)
+    for (int i = 0; i < 2; ++i)
     {
         sylar::Thread::ptr thr(new sylar::Thread(&fun2, "name_" + std::to_string(i*2)));
         thrs.push_back(thr);
@@ -54,7 +54,7 @@ int main(int argc, char** argv)
         thrs.push_back(thr2);
     }
 
-    for(size_t i = 0; i < thrs.size(); ++i)
+    for (size_t i = 0; i < thrs.size(); ++i)
     {
         thrs[i]->join();
     }

@@ -44,7 +44,7 @@ public:
 
     void lock()
     {
-        if(!m_locked)
+        if (!m_locked)
         {
             m_mutex.lock();
             m_locked = true;
@@ -53,7 +53,7 @@ public:
 
     void unlock()
     {
-        if(m_locked)
+        if (m_locked)
         {
             m_mutex.unlock();
             m_locked = false;
@@ -82,7 +82,7 @@ public:
 
     void lock()
     {
-        if(!m_locked)
+        if (!m_locked)
         {
             m_mutex.rdlock();
             m_locked = true;
@@ -91,7 +91,7 @@ public:
 
     void unlock()
     {
-        if(m_locked)
+        if (m_locked)
         {
             m_mutex.unlock();
             m_locked = false;
@@ -120,7 +120,7 @@ public:
 
     void lock()
     {
-        if(!m_locked)
+        if (!m_locked)
         {
             m_mutex.wrlock();
             m_locked = true;
@@ -129,7 +129,7 @@ public:
 
     void unlock()
     {
-        if(m_locked)
+        if (m_locked)
         {
             m_mutex.unlock();
             m_locked = false;

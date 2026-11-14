@@ -25,7 +25,7 @@ static void func1()
 {
     SYLAR_LOG_INFO(g_logger) << "func1: started";
     SYLAR_LOG_INFO(g_logger) << "func1: swapcontext(&uctx_fun1, &uctx_fun2)";
-    if(swapcontext(&uctx_func1, &uctx_func2) == -1)
+    if (swapcontext(&uctx_func1, &uctx_func2) == -1)
     {
         handler_error("swapcontext");
     }
@@ -36,7 +36,7 @@ static void func2()
 {
     SYLAR_LOG_INFO(g_logger) << "func2: started";
     SYLAR_LOG_INFO(g_logger) << "func2: swapcontext(&uctx_fun2, &uctx_fun1)";
-    if(swapcontext(&uctx_func2, &uctx_func1) == -1)
+    if (swapcontext(&uctx_func2, &uctx_func1) == -1)
     {
         handler_error("swapcontext");
     }
@@ -50,7 +50,7 @@ void test_makecontext_swapcontext(int argc)
     char func2_stack[16384];
 
     // 初始化 uctx_func1，并将 uctx_func1 的后继协程指定为 uctx_main
-    if(getcontext(&uctx_func1) == -1)
+    if (getcontext(&uctx_func1) == -1)
     {
         handler_error("getcontext");
     }
@@ -60,7 +60,7 @@ void test_makecontext_swapcontext(int argc)
     makecontext(&uctx_func1, func1, 0);
 
     // 初始化 utx_fun2，并将 uctx_func2 的后继协程指定为 uctx_func1 或 结束
-    if(getcontext(&uctx_func2) == -1)
+    if (getcontext(&uctx_func2) == -1)
     {
         handler_error("getcontext");
     }
@@ -70,7 +70,7 @@ void test_makecontext_swapcontext(int argc)
     makecontext(&uctx_func2, func2, 0);
 
     SYLAR_LOG_INFO(g_logger) << "main: swapcontext(&uctx_main, &uctx_func2)";
-    if(swapcontext(&uctx_main, &uctx_func2) == -1)
+    if (swapcontext(&uctx_main, &uctx_func2) == -1)
     {
         handler_error("swapcontext");
     }

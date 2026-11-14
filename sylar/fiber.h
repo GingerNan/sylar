@@ -37,7 +37,6 @@ public:
     ~Fiber();
 
     // 重置协程函数，并重置状态
-    // INIT, TERM
     void reset(std::function<void()> cb);
     // 切换到当前协程执行
     void swapIn();

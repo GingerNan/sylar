@@ -33,28 +33,28 @@ sylar::ConfigVar<std::unordered_map<std::string, int>>::ptr g_int_umap_value_con
 
 void print_yaml(const YAML::Node& node, int level)
 {
-    if(node.IsScalar())
+    if (node.IsScalar())
     {
         SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << std::string(level * 4, ' ')
             << node.Scalar() << " - " << node.Type() << " - " << level;
     }
-    else if(node.IsNull())
+    else if (node.IsNull())
     {
         SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << std::string(level * 4, ' ')
             << "NULLL - " << node.Type() << " - " << level;
     }
-    else if(node.IsMap())
+    else if (node.IsMap())
     {
-        for(auto it = node.begin(); it != node.end(); ++it)
+        for (auto it = node.begin(); it != node.end(); ++it)
         {
             SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << std::string(level * 4, ' ')
                 << it->first << " - " << it->second.Type() << " - " << level;
             print_yaml(it->second, level + 1);
         }
     }
-    else if(node.IsSequence())
+    else if (node.IsSequence())
     {
-        for(size_t i = 0; i < node.size(); ++i)
+        for (size_t i = 0; i < node.size(); ++i)
         {
             SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << std::string(level * 4, ' ')
                 << i << " - " << node[i].Type() << " - " << level;
@@ -80,7 +80,7 @@ void test_config()
 #define XX(g_var, name, prefix) \
     { \
         auto& v = g_var->getValue(); \
-        for(auto& i : v) { \
+        for (auto& i : v) { \
             SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << #prefix " " #name << " : " << i; \
         } \
         SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << #prefix " " #name " yaml: " << g_var->toString(); \
@@ -89,7 +89,7 @@ void test_config()
 #define XX_M(g_var, name, prefix) \
     { \
         auto& v = g_var->getValue(); \
-        for(auto& i : v) { \
+        for (auto& i : v) { \
             SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << #prefix " " #name << " : {" \
                 << i.first << " - " << i.second << "}"; \
         } \
@@ -197,7 +197,7 @@ void test_class()
 #define XX_MP(g_var, prefix) \
     { \
         auto& m = g_var->getValue(); \
-        for(auto& i : m) { \
+        for (auto& i : m) { \
             SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << #prefix << ": " << i.first << " - " << i.second.toString(); \
         } \
         SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << #prefix << ": size=" << m.size(); \

@@ -27,7 +27,7 @@ Scheduler::Scheduler(size_t threads, bool user_caller, const std::string& name)
 {
     SYLAR_ASSERT(threads > 0);
 
-    if(user_caller)
+    if (user_caller)
     {
         sylar::Fiber::GetThis();
         --threads;
@@ -52,7 +52,7 @@ Scheduler::Scheduler(size_t threads, bool user_caller, const std::string& name)
 Scheduler::~Scheduler()
 {
     SYLAR_ASSERT(m_stopping);
-    if(GetThis() == this)
+    if (GetThis() == this)
     {
         t_scheduler = nullptr;
     }
@@ -61,8 +61,7 @@ Scheduler::~Scheduler()
 void Scheduler::start()
 {
     MutexType::Lock lock(m_mutex);
-    if(!m_stopping)
-    {
+    if (!m_stopping) {
         return;
     }
     m_stopping = false;
@@ -70,7 +69,7 @@ void Scheduler::start()
     SYLAR_ASSERT(m_threads.empty());
 
     m_threads.resize(m_threadCount);
-    for(size_t i = 0; i < m_threadCount; ++i)
+    for (size_t i = 0; i < m_threadCount; ++i)
     {
         m_threads[i].reset(new Thread(std::bind(&Scheduler::run, this),
                  m_name + "_" + std::to_string(i)));
@@ -79,7 +78,7 @@ void Scheduler::start()
     }
     lock.unlock();
 
-    if(m_rootFiber)
+    if (m_rootFiber)
     {
         // m_rootFiber->swapIn();
         m_rootFiber->call();
@@ -90,21 +89,21 @@ void Scheduler::start()
 void Scheduler::stop()
 {
     m_autoStop = true;
-    if(m_rootFiber && m_threadCount == 0
+    if (m_rootFiber && m_threadCount == 0
         && (m_rootFiber->getState() == Fiber::TERM
-        && m_rootFiber->getState() == Fiber::INIT))
+        || m_rootFiber->getState() == Fiber::INIT))
     {
         SYLAR_LOG_INFO(g_logger) << this << " stopped";
         m_stopping = true;
 
-        if(stopping())
+        if (stopping())
         {
             return;
         }
     }
 
     // bool exit_on_this_fiber = false;
-    if(m_rootThread != -1)
+    if (m_rootThread != -1)
     {
         SYLAR_ASSERT(GetThis() == this);
     }
@@ -114,22 +113,22 @@ void Scheduler::stop()
     }
 
     m_stopping = true;
-    for(size_t i = 0; i < m_threadCount; ++i)
+    for (size_t i = 0; i < m_threadCount; ++i)
     {
         tickle();
     }
 
-    if(m_rootFiber)
+    if (m_rootFiber)
     {
         tickle();
     }
 
-    if(stopping())
+    if (stopping())
     {
         return;
     }
 
-    // if(exit_on_this_fiber)
+    // if (exit_on_this_fiber)
     // {
     // }    
 }
@@ -140,7 +139,7 @@ void Scheduler::run()
     Fiber::GetThis();
     setThis();
 
-    if(sylar::GetThreadId() != m_rootThread)
+    if (sylar::GetThreadId() != m_rootThread)
     {
         t_fiber = Fiber::GetThis().get();
     }
@@ -149,7 +148,7 @@ void Scheduler::run()
     Fiber::ptr cb_fiber;
 
     FiberAndThread ft;
-    while(true)
+    while (true)
     {
         ft.reset();
         bool tickle_me = false;
@@ -158,7 +157,7 @@ void Scheduler::run()
             auto it = m_fibers.begin();
             while (it != m_fibers.end())
             {
-                if(it->thread != -1 && it->thread != sylar::GetThreadId())
+                if (it->thread != -1 && it->thread != sylar::GetThreadId())
                 {
                     ++it;
                     tickle_me = true;
@@ -166,7 +165,7 @@ void Scheduler::run()
                 }   
 
                 SYLAR_ASSERT(it->fiber || it->cb);
-                if(it->fiber && it->fiber->getState() == Fiber::EXEC)
+                if (it->fiber && it->fiber->getState() == Fiber::EXEC)
                 {
                     ++it;
                     continue;
@@ -176,32 +175,32 @@ void Scheduler::run()
                 m_fibers.erase(it);
             }
 
-            if(tickle_me)
+            if (tickle_me)
             {
                 tickle();
             }
 
-            if(ft.fiber && (ft.fiber->getState() != Fiber::TERM
+            if (ft.fiber && (ft.fiber->getState() != Fiber::TERM
                 || ft.fiber->getState() != Fiber::EXCEPT))
             {
                 ++m_activeThreadCount;
                 ft.fiber->swapIn();
                 --m_activeThreadCount;
 
-                if(ft.fiber->getState() == Fiber::READY)
+                if (ft.fiber->getState() == Fiber::READY)
                 {
                     schedule(ft.fiber);
                 }
-                else if(ft.fiber->getState() != Fiber::TERM
+                else if (ft.fiber->getState() != Fiber::TERM
                     && ft.fiber->getState() != Fiber::EXCEPT)
                 {
                     ft.fiber->m_state = Fiber::HOLD;    // 协程设置为暂停状态
                 }
                 ft.reset();
             }
-            else if(ft.cb)
+            else if (ft.cb)
             {
-                if(cb_fiber)
+                if (cb_fiber)
                 {
                     cb_fiber->reset(ft.cb);
                 }
@@ -216,17 +215,17 @@ void Scheduler::run()
                 cb_fiber->swapIn();
                 --m_activeThreadCount;
                 
-                if(cb_fiber->getState() == Fiber::READY)
+                if (cb_fiber->getState() == Fiber::READY)
                 {
                     schedule(cb_fiber);
                     cb_fiber.reset();
                 }
-                else if(cb_fiber->getState() == Fiber::EXCEPT
+                else if (cb_fiber->getState() == Fiber::EXCEPT
                     || cb_fiber->getState() == Fiber::TERM)
                 {
                     cb_fiber->reset(nullptr);
                 }
-                else //if(cb_fiber->getState() != Fiber::TERM)
+                else //if (cb_fiber->getState() != Fiber::TERM)
                 {
                     cb_fiber->m_state = Fiber::HOLD;
                     cb_fiber.reset();
@@ -234,7 +233,7 @@ void Scheduler::run()
             }
             else
             {
-                if(idle_fiber->getState() == Fiber::TERM)
+                if (idle_fiber->getState() == Fiber::TERM)
                 {
                     SYLAR_LOG_INFO(g_logger) << "idle fiber term";
                     break;
@@ -244,8 +243,8 @@ void Scheduler::run()
                 idle_fiber->swapIn();
                 --m_idleThreadCount;
 
-                if(idle_fiber->getState() != Fiber::TERM
-                    || idle_fiber->getState() != Fiber::EXCEPT)
+                if (idle_fiber->getState() != Fiber::TERM
+                    && idle_fiber->getState() != Fiber::EXCEPT)
                 {
                     idle_fiber->m_state = Fiber::HOLD;
                 }

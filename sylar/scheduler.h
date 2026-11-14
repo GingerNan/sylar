@@ -38,7 +38,7 @@ public:
             need_tickle = scheduleNoLock(fc, thread);
         }
 
-        if(need_tickle)
+        if (need_tickle)
         {
             tickle();
         }
@@ -56,7 +56,7 @@ public:
             }
         }
 
-        if(need_tickle)
+        if (need_tickle)
         {
             tickle();
         }
@@ -75,7 +75,7 @@ private:
     {
         bool need_tickle = m_fibers.empty();
         FiberAndThread ft(fc, thread);
-        if(ft.fiber || ft.cb)
+        if (ft.fiber || ft.cb)
         {
             m_fibers.push_back(ft);
         }

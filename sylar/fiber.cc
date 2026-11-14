@@ -10,7 +10,7 @@ namespace sylar
 {
 static Logger::ptr g_logger = SYLAR_LOG_NAME("system");
 
-static std::atomic<uint64_t> s_fiber_id{0};
+static std::atomic<uint64_t> s_fiber_id{0};             // 全局的fiber_id用来自增
 static std::atomic<uint64_t> s_fiber_count{0};
 
 static thread_local Fiber* t_fiber = nullptr;
@@ -36,8 +36,7 @@ using StackAllocator = MallocStackAllocator;
 
 uint64_t Fiber::GetFiberId()
 {
-    if(t_fiber)
-    {
+    if (t_fiber) {
         return t_fiber->getId();
     }
     return 0;
@@ -50,7 +49,7 @@ void Fiber::SetThis(Fiber* f)
 
 Fiber::ptr Fiber::GetThis()
 {
-    if(t_fiber)
+    if (t_fiber)
     {
         return t_fiber->shared_from_this();
     }
@@ -63,6 +62,7 @@ Fiber::ptr Fiber::GetThis()
 void Fiber::YeildToReady()
 {
     Fiber::ptr cur = GetThis();
+    SYLAR_ASSERT(cur->m_state == EXEC)
     cur->m_state = READY;
     cur->swapOut();
 }
@@ -70,6 +70,7 @@ void Fiber::YeildToReady()
 void Fiber::YeildToHold()
 {
     Fiber::ptr cur = GetThis();
+    SYLAR_ASSERT(cur->m_state == EXEC)
     cur->m_state = HOLD;
     cur->swapOut();
 }
@@ -117,7 +118,7 @@ Fiber::Fiber()
 {
     SetThis(this);
 
-    if(getcontext(&m_ctx))
+    if (getcontext(&m_ctx))
     {
         SYLAR_ASSERT2(false, "getcontext");
     }
@@ -135,7 +136,7 @@ Fiber::Fiber(std::function<void()> cb, size_t stacksize)
     ++s_fiber_count;
 
     m_stack = StackAllocator::Alloc(m_stacksize);
-    if(getcontext(&m_ctx))
+    if (getcontext(&m_ctx))
     {
         SYLAR_ASSERT2(false, "getcontext");
     }
@@ -152,7 +153,7 @@ Fiber::Fiber(std::function<void()> cb, size_t stacksize)
 Fiber::~Fiber()
 {
     --s_fiber_count;
-    if(m_stack)
+    if (m_stack)
     {
         SYLAR_ASSERT(m_state == TERM 
             || m_state == INIT
@@ -165,7 +166,7 @@ Fiber::~Fiber()
         SYLAR_ASSERT(m_state == EXEC);
 
         Fiber* cur = t_fiber;
-        if(cur == this)
+        if (cur == this)
         {
             SetThis(nullptr);
         }
@@ -180,7 +181,7 @@ void Fiber::reset(std::function<void()> cb)
     SYLAR_ASSERT(m_state == TERM || m_state == INIT || m_state == EXCEPT);
 
     m_cb = cb;
-    if(getcontext(&m_ctx))
+    if (getcontext(&m_ctx))
     {
         SYLAR_ASSERT2(false, "getcontext");
     }
@@ -195,9 +196,10 @@ void Fiber::reset(std::function<void()> cb)
 void Fiber::call()
 {
     SetThis(this);
-
     m_state = EXEC;
-    if(swapcontext(&t_threadFiber->m_ctx, &m_ctx))
+    
+    SYLAR_LOG_ERROR(g_logger) << getId();
+    if (swapcontext(&t_threadFiber->m_ctx, &m_ctx))
     {
         SYLAR_ASSERT2(false, "swapcontext");
     }
@@ -209,7 +211,7 @@ void Fiber::swapIn()
     SYLAR_ASSERT(m_state != EXEC);
 
     m_state = EXEC;
-    if(swapcontext(&Scheduler::GetMainFiber()->m_ctx, &m_ctx))
+    if (swapcontext(&Scheduler::GetMainFiber()->m_ctx, &m_ctx))
     {
         SYLAR_ASSERT2(false, "swapcontext");
     }
@@ -219,7 +221,7 @@ void Fiber::swapOut()
 {
     SetThis(Scheduler::GetMainFiber());
 
-    if(swapcontext(&m_ctx, &Scheduler::GetMainFiber()->m_ctx))
+    if (swapcontext(&m_ctx, &Scheduler::GetMainFiber()->m_ctx))
     {
         SYLAR_ASSERT2(false, "swapcontext");
     }

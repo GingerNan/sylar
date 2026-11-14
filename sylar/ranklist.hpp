@@ -205,7 +205,7 @@ uint64_t RankList<K, V, Comparator>::GetByRank(int rank)
         it.SeekByRank(rank);
     }
 
-    if(!it.Valid()) {
+    if (!it.Valid()) {
         return 0;
     }
 

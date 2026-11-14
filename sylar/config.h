@@ -67,7 +67,7 @@ public:
         YAML::Node node = YAML::Load(v);
         typename std::vector<T> vec;
         std::stringstream ss;
-        for(size_t i = 0; i < node.size(); ++i)
+        for (size_t i = 0; i < node.size(); ++i)
         {
             ss.str("");
             ss << node[i];
@@ -84,7 +84,7 @@ public:
     std::string operator()(const std::vector<T>& v)
     {
         YAML::Node node;
-        for(auto& i : v)
+        for (auto& i : v)
         {
             node.push_back(YAML::Load(LexicalCast<T, std::string>()(i)));
         }
@@ -104,7 +104,7 @@ public:
         YAML::Node node = YAML::Load(v);
         typename std::list<T> list;
         std::stringstream ss;
-        for(size_t i = 0; i < node.size(); ++i)
+        for (size_t i = 0; i < node.size(); ++i)
         {
             ss.str("");
             ss << node[i];
@@ -121,7 +121,7 @@ public:
     std::string operator()(const std::list<T>& v)
     {
         YAML::Node node;
-        for(auto& i : v)
+        for (auto& i : v)
         {
             node.push_back(YAML::Load(LexicalCast<T, std::string>()(i)));
         }
@@ -141,7 +141,7 @@ public:
         YAML::Node node = YAML::Load(v);
         typename std::set<T> set;
         std::stringstream ss;
-        for(size_t i = 0; i < node.size(); ++i)
+        for (size_t i = 0; i < node.size(); ++i)
         {
             ss.str("");
             ss << node[i];
@@ -158,7 +158,7 @@ public:
     std::string operator()(const std::set<T>& v)
     {
         YAML::Node node;
-        for(auto& i : v)
+        for (auto& i : v)
         {
             node.push_back(YAML::Load(LexicalCast<T, std::string>()(i)));
         }
@@ -178,7 +178,7 @@ public:
         YAML::Node node = YAML::Load(v);
         typename std::unordered_set<T> set;
         std::stringstream ss;
-        for(size_t i = 0; i < node.size(); ++i)
+        for (size_t i = 0; i < node.size(); ++i)
         {
             ss.str("");
             ss << node[i];
@@ -195,7 +195,7 @@ public:
     std::string operator()(const std::unordered_set<T>& v)
     {
         YAML::Node node;
-        for(auto& i : v)
+        for (auto& i : v)
         {
             node.push_back(YAML::Load(LexicalCast<T, std::string>()(i)));
         }
@@ -215,7 +215,7 @@ public:
         YAML::Node node = YAML::Load(v);
         typename std::map<std::string, T> map;
         std::stringstream ss;
-        for(auto it = node.begin(); it != node.end(); ++it)
+        for (auto it = node.begin(); it != node.end(); ++it)
         {
             ss.str("");
             ss << it->second;
@@ -232,7 +232,7 @@ public:
     std::string operator()(const std::map<std::string, T>& v)
     {
         YAML::Node node;
-        for(auto& i : v)
+        for (auto& i : v)
         {
             node[i.first] = YAML::Load(LexicalCast<T, std::string>()(i.second));
         }
@@ -252,7 +252,7 @@ public:
         YAML::Node node = YAML::Load(v);
         typename std::unordered_map<std::string, T> map;
         std::stringstream ss;
-        for(auto it = node.begin(); it != node.end(); ++it)
+        for (auto it = node.begin(); it != node.end(); ++it)
         {
             ss.str("");
             ss << it->second;
@@ -269,7 +269,7 @@ public:
     std::string operator()(const std::unordered_map<std::string, T>& v)
     {
         YAML::Node node;
-        for(auto& i : v)
+        for (auto& i : v)
         {
             node[i.first] = YAML::Load(LexicalCast<T, std::string>()(i.second));
         }
@@ -344,7 +344,7 @@ public:
                 return;
             }
 
-            for(auto& i : m_cbs) {
+            for (auto& i : m_cbs) {
                 i.second(m_val, v);
             }
         }
@@ -400,10 +400,10 @@ public:
     {
         RWMutexType::WriteLock lock(GetMutex());
         auto it = GetDatas().find(name);
-        if(it != GetDatas().end())
+        if (it != GetDatas().end())
         {
             auto tmp = std::dynamic_pointer_cast<ConfigVar<T>>(it->second);
-            if(tmp)
+            if (tmp)
             {
                 SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "Lookup name=" << name << "exists";
                 return tmp;
@@ -417,7 +417,7 @@ public:
             }
         }
 
-        if(name.find_first_not_of("abcdefghijklmnopqrstuvwxyz._0123456789")
+        if (name.find_first_not_of("abcdefghijklmnopqrstuvwxyz._0123456789")
             != std::string::npos)
         {
             SYLAR_LOG_ERROR(SYLAR_LOG_ROOT()) << "Lookup name invalid" << name;
@@ -434,7 +434,7 @@ public:
     {
         RWMutexType::ReadLock lock(GetMutex());
         auto it = GetDatas().find(name);
-        if(it == GetDatas().end())
+        if (it == GetDatas().end())
         {
             return nullptr;
         }

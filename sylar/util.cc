@@ -27,13 +27,13 @@ void Backtrace(std::vector<std::string>& bt, int size, int skip)
     size_t s = ::backtrace(array, size);
 
     char** strings = backtrace_symbols(array, s);
-    if(strings == NULL)
+    if (strings == NULL)
     {
         SYLAR_LOG_ERROR(g_logger) << "backtrace_synbols error";
         return;
     }
 
-    for(size_t i = skip; i < s; ++i)
+    for (size_t i = skip; i < s; ++i)
     {
         bt.push_back(strings[i]);
     }
@@ -46,7 +46,7 @@ std::string BacktraceToString(int size, int skip, const std::string& prefix)
     std::vector<std::string> bt;
     Backtrace(bt, size, skip);
     std::stringstream ss;
-    for(size_t i = 0; i < bt.size(); ++i)
+    for (size_t i = 0; i < bt.size(); ++i)
     {
         ss << prefix << bt[i] << std::endl;
     }
