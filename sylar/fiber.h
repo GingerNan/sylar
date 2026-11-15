@@ -63,15 +63,14 @@ public:
     static void MainFunc();
     static uint64_t GetFiberId();
 private:
-    uint64_t m_id = 0;
-    uint32_t m_stacksize = 0;
-    State m_state = INIT;
+    uint64_t m_id = 0;              // 协程id
+    uint32_t m_stacksize = 0;       // 协程运行栈大小
+    State m_state = INIT;           // 协程状态
 
-    ucontext_t m_ctx;
-    void* m_stack = nullptr;
+    ucontext_t m_ctx;               // 协程上下文
+    void* m_stack = nullptr;        // 协程运行栈指针
 
-
-    std::function<void()> m_cb;
+    std::function<void()> m_cb;     // 协程运行函数
 };
 
 } // namespace sylar

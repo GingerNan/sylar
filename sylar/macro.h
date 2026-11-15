@@ -6,6 +6,7 @@
 
 #include "util.h"
 
+// Assert作用：当条件为假时，程序终止
 #define SYLAR_ASSERT(x) \
     if (!(x)) { \
         SYLAR_LOG_ERROR(SYLAR_LOG_ROOT()) << "ASSERTION: " #x \

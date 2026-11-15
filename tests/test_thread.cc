@@ -41,8 +41,8 @@ void fun3()
 int main(int argc, char** argv)
 {
     SYLAR_LOG_INFO(g_logger) << "thread test begin";
-    YAML::Node root = YAML::LoadFile("/home/cola/workstation/sylar/bin/config/log2.yml");
-    sylar::Config::LoadFromYaml(root);
+    // YAML::Node root = YAML::LoadFile("/home/cola/workstation/sylar/bin/config/log2.yml");
+    // sylar::Config::LoadFromYaml(root);
 
     std::vector<sylar::Thread::ptr> thrs;
     for (int i = 0; i < 2; ++i)
@@ -56,10 +56,10 @@ int main(int argc, char** argv)
 
     for (size_t i = 0; i < thrs.size(); ++i)
     {
-        thrs[i]->join();
+        thrs[i]->join();        // 主线程等待子线程完成
     }
-    SYLAR_LOG_INFO(g_logger) << "thread test end" << std::endl;
 
+    SYLAR_LOG_INFO(g_logger) << "thread test end" << std::endl;
     SYLAR_LOG_INFO(g_logger) << "count=" << count;
 
     return 0;
