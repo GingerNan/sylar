@@ -23,15 +23,14 @@ private:
         using MutexType = Mutex;
 
         struct EventContext {
-            void triggerEvent(Event event);
-
             Scheduler* scheduler = nullptr;     // 事件执行的scheduler
             Fiber::ptr fiber;                   // 事件协程
             std::function<void()> cb;           // 事件的回调函数
         };
-
+        
         EventContext& getContext(Event event);
         void resetContext(EventContext& ctx);
+        void triggerEvent(Event event);
 
         EventContext read;      // 读事件
         EventContext write;     // 写事件

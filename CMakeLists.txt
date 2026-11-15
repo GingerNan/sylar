@@ -11,6 +11,7 @@ include_directories(.)
 set(LIB_SRC
     sylar/config.cc
     sylar/fiber.cc
+    sylar/iomanager.cc
     sylar/log.cc
     sylar/mutex.cc
     sylar/scheduler.cc
@@ -71,6 +72,11 @@ add_executable(test_ranklist tests/test_ranklist.cc)
 add_dependencies(test_ranklist sylar)
 force_redefine_file_macro_for_sources(test_ranklist)  #__FILE__
 target_link_libraries(test_ranklist sylar)
+
+add_executable(test_iomanager tests/test_iomanager.cc)
+add_dependencies(test_iomanager sylar)
+force_redefine_file_macro_for_sources(test_iomanager)  #__FILE__
+target_link_libraries(test_iomanager sylar)
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
