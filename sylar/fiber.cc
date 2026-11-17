@@ -16,6 +16,7 @@ static std::atomic<uint64_t> s_fiber_count{0};
 static thread_local Fiber* t_fiber = nullptr;
 static thread_local Fiber::ptr t_threadFiber = nullptr;
 
+// 协程的堆栈大小
 static ConfigVar<uint32_t>::ptr g_fiber_statck_size =
     Config::Lookup<uint32_t>("fiber.stack_size", 1024*1024, "fiber stack size");
 
@@ -54,7 +55,7 @@ Fiber::ptr Fiber::GetThis()
         return t_fiber->shared_from_this();
     }
     Fiber::ptr main_fiber(new Fiber);
-    SYLAR_ASSERT(t_fiber == main_fiber.get());
+    SYLAR_ASSERT(t_fiber == main_fiber.get());  // 这里 t_fiber 肯定是 main_fiber
     t_threadFiber = main_fiber;
     return t_fiber->shared_from_this();
 }
@@ -62,7 +63,7 @@ Fiber::ptr Fiber::GetThis()
 void Fiber::YeildToReady()
 {
     Fiber::ptr cur = GetThis();
-    SYLAR_ASSERT(cur->m_state == EXEC)
+    SYLAR_ASSERT(cur->m_state == EXEC);
     cur->m_state = READY;
     cur->swapOut();
 }
@@ -70,7 +71,7 @@ void Fiber::YeildToReady()
 void Fiber::YeildToHold()
 {
     Fiber::ptr cur = GetThis();
-    SYLAR_ASSERT(cur->m_state == EXEC)
+    SYLAR_ASSERT(cur->m_state == EXEC);
     cur->m_state = HOLD;
     cur->swapOut();
 }
@@ -145,6 +146,7 @@ Fiber::Fiber(std::function<void()> cb, size_t stacksize)
     m_ctx.uc_stack.ss_sp = m_stack;
     m_ctx.uc_stack.ss_size = m_stacksize;
 
+    // 当 m_ctx 协程激活时，执行 Fiber::MainFunc
     makecontext(&m_ctx, &Fiber::MainFunc, 0);
 
     SYLAR_LOG_DEBUG(g_logger) << "Fiber::Fiber id=" << m_id;

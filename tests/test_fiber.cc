@@ -78,21 +78,21 @@ void test_fiber()
 
 int main(int argc, char** argv)
 {
-    // sylar::Thread::SetName("main");
+    sylar::Thread::SetName("main");
 
-    // std::vector<sylar::Thread::ptr> thrs;
-    // for (int i = 0; i < 3; ++i)
-    // {
-    //     thrs.push_back(sylar::Thread::ptr(
-    //         new sylar::Thread(test_fiber, "name_" + std::to_string(i))));
-    // }
+    std::vector<sylar::Thread::ptr> thrs;
+    for (int i = 0; i < 3; ++i)
+    {
+        thrs.push_back(sylar::Thread::ptr(
+            new sylar::Thread(test_fiber, "t" + std::to_string(i+1))));
+    }
 
-    // for (auto i : thrs)
-    // {
-    //     i->join();
-    // }
+    for (auto i : thrs)
+    {
+        i->join();
+    }
 
-    test_ucontext();
+    // test_ucontext();
 
     return 0;
 }
