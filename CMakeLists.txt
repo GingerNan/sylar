@@ -16,6 +16,7 @@ set(LIB_SRC
     sylar/mutex.cc
     sylar/scheduler.cc
     sylar/thread.cc
+    sylar/timer.cc
     sylar/util.cc
 )
 

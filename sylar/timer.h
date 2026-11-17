@@ -62,13 +62,15 @@ public:
     uint64_t getNextTimer();
 
     void listExpiredCb(std::vector<std::function<void()>>& cbs);
-
+    
+    bool hasTimer();
 protected:
     virtual void onTimerInsertedAtFront() = 0;
 
     void addTimer(Timer::ptr val, RWMutexType::WriteLock& lock);
 
 private:
+    // 判断时间是否更改
     bool detectClockRollover(uint64_t now_ms);
 
 private:

@@ -19,9 +19,9 @@ bool Timer::Comparator::operator()(const Timer::ptr& lhs, const Timer::ptr& rhs)
 Timer::Timer(uint64_t ms, std::function<void()> cb, bool recurring, TimerManager* manager)
     : m_recurring(recurring)
     , m_ms(ms)
+    , m_next(sylar::GetCurrentMS() + m_ms)
     , m_cb(cb)
     , m_manager(manager)
-    , m_next(sylar::GetCurrentMS() + m_ms)
 {
 }
 
@@ -200,6 +200,12 @@ void TimerManager::listExpiredCb(std::vector<std::function<void()>>& cbs)
             timer->m_cb = nullptr;
         }
     }
+}
+
+bool TimerManager::hasTimer()
+{
+    RWMutexType::ReadLock lock(m_mutex);
+    return !m_timers.empty();
 }
 
 void TimerManager::addTimer(Timer::ptr val, RWMutexType::WriteLock& lock)
