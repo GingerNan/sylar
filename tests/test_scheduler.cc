@@ -11,9 +11,9 @@ int main(int argc, char** argv)
 {
     SYLAR_LOG_INFO(g_logger) << "main";
     sylar::Scheduler sc;
+    
+    sc.scheduler(&test_fiber);
     sc.start();
-
-    // sc.scheduler(&test_fiber);
 
     sc.stop();
     SYLAR_LOG_INFO(g_logger) << "over";
