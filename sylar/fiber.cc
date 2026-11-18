@@ -221,12 +221,24 @@ void Fiber::swapIn()
 
 void Fiber::swapOut()
 {
-    SetThis(Scheduler::GetMainFiber());
-
-    if (swapcontext(&m_ctx, &Scheduler::GetMainFiber()->m_ctx))
+    if (t_fiber != Scheduler::GetMainFiber())
     {
-        SYLAR_ASSERT2(false, "swapcontext");
+        SetThis(Scheduler::GetMainFiber());
+        if (swapcontext(&m_ctx, &Scheduler::GetMainFiber()->m_ctx))
+        {
+            SYLAR_ASSERT2(false, "swapcontext");
+        }
     }
+    else
+    {
+        SetThis(t_threadFiber.get());
+        if (swapcontext(&m_ctx, &t_threadFiber->m_ctx))
+        {
+            SYLAR_ASSERT2(false, "swapcontext");
+        }
+    }
+
+    
 }
 
 } // namespace sylar
