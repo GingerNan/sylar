@@ -40,11 +40,11 @@ void IOManager::FdContext::triggerEvent(Event event)
     EventContext& ctx = getContext(event);
     if (ctx.cb)
     {
-        ctx.scheduler->schedule(&ctx.cb);
+        ctx.scheduler->scheduler(&ctx.cb);
     }
     else
     {
-        ctx.scheduler->schedule(&ctx.fiber);
+        ctx.scheduler->scheduler(&ctx.fiber);
     }
     ctx.scheduler = nullptr;
 }

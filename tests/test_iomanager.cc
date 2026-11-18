@@ -11,7 +11,7 @@ void test_fiber()
 void test1()
 {
     sylar::IOManager iom;
-    iom.schedule(&test_fiber);
+    iom.scheduler(&test_fiber);
 }
 
 int main(int argc, char** argv)

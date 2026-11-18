@@ -71,6 +71,9 @@ protected:
 
     void setThis();
 
+    // 是否有空闲线程
+    bool hasIdleThreads() { return m_idleThreadCount > 0; }
+
 private:
     template<class FiberOrCb>
     bool schedulerNoLock(FiberOrCb fc, int thread)
