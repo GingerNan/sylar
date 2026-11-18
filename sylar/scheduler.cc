@@ -174,80 +174,80 @@ void Scheduler::run()
                 ft = *it;
                 m_fibers.erase(it);
             }
+        }
 
-            if (tickle_me)
+        if (tickle_me)
+        {
+            tickle();
+        }
+
+        if (ft.fiber && (ft.fiber->getState() != Fiber::TERM
+            && ft.fiber->getState() != Fiber::EXCEPT))
+        {
+            ++m_activeThreadCount;
+            ft.fiber->swapIn();
+            --m_activeThreadCount;
+
+            if (ft.fiber->getState() == Fiber::READY)
             {
-                tickle();
+                schedule(ft.fiber);
             }
-
-            if (ft.fiber && (ft.fiber->getState() != Fiber::TERM
-                || ft.fiber->getState() != Fiber::EXCEPT))
+            else if (ft.fiber->getState() != Fiber::TERM
+                && ft.fiber->getState() != Fiber::EXCEPT)
             {
-                ++m_activeThreadCount;
-                ft.fiber->swapIn();
-                --m_activeThreadCount;
-
-                if (ft.fiber->getState() == Fiber::READY)
-                {
-                    schedule(ft.fiber);
-                }
-                else if (ft.fiber->getState() != Fiber::TERM
-                    && ft.fiber->getState() != Fiber::EXCEPT)
-                {
-                    ft.fiber->m_state = Fiber::HOLD;    // 协程设置为暂停状态
-                }
-                ft.reset();
+                ft.fiber->m_state = Fiber::HOLD;    // 协程设置为暂停状态
             }
-            else if (ft.cb)
+            ft.reset();
+        }
+        else if (ft.cb)
+        {
+            if (cb_fiber)
             {
-                if (cb_fiber)
-                {
-                    cb_fiber->reset(ft.cb);
-                }
-                else
-                {
-                    cb_fiber.reset(new Fiber(ft.cb));
-                    ft.cb = nullptr;
-                }
-
-                ft.reset();
-                ++m_activeThreadCount;
-                cb_fiber->swapIn();
-                --m_activeThreadCount;
-                
-                if (cb_fiber->getState() == Fiber::READY)
-                {
-                    schedule(cb_fiber);
-                    cb_fiber.reset();
-                }
-                else if (cb_fiber->getState() == Fiber::EXCEPT
-                    || cb_fiber->getState() == Fiber::TERM)
-                {
-                    cb_fiber->reset(nullptr);
-                }
-                else //if (cb_fiber->getState() != Fiber::TERM)
-                {
-                    cb_fiber->m_state = Fiber::HOLD;
-                    cb_fiber.reset();
-                }
+                cb_fiber->reset(ft.cb);
             }
             else
             {
-                if (idle_fiber->getState() == Fiber::TERM)
-                {
-                    SYLAR_LOG_INFO(g_logger) << "idle fiber term";
-                    break;
-                }
+                cb_fiber.reset(new Fiber(ft.cb));
+                ft.cb = nullptr;
+            }
 
-                ++m_idleThreadCount;
-                idle_fiber->swapIn();
-                --m_idleThreadCount;
+            ft.reset();
+            ++m_activeThreadCount;
+            cb_fiber->swapIn();
+            --m_activeThreadCount;
+                
+            if (cb_fiber->getState() == Fiber::READY)
+            {
+                schedule(cb_fiber);
+                cb_fiber.reset();
+            }
+            else if (cb_fiber->getState() == Fiber::EXCEPT
+                || cb_fiber->getState() == Fiber::TERM)
+            {
+                cb_fiber->reset(nullptr);
+            }
+            else //if (cb_fiber->getState() != Fiber::TERM)
+            {
+                cb_fiber->m_state = Fiber::HOLD;
+                cb_fiber.reset();
+            }
+        }
+        else
+        {
+            if (idle_fiber->getState() == Fiber::TERM)
+            {
+                SYLAR_LOG_INFO(g_logger) << "idle fiber term";
+                break;
+            }
 
-                if (idle_fiber->getState() != Fiber::TERM
-                    && idle_fiber->getState() != Fiber::EXCEPT)
-                {
-                    idle_fiber->m_state = Fiber::HOLD;
-                }
+            ++m_idleThreadCount;
+            idle_fiber->swapIn();
+            --m_idleThreadCount;
+
+            if (idle_fiber->getState() != Fiber::TERM
+                && idle_fiber->getState() != Fiber::EXCEPT)
+            {
+                idle_fiber->m_state = Fiber::HOLD;
             }
         }
     }

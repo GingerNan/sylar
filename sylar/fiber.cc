@@ -200,7 +200,7 @@ void Fiber::call()
     SetThis(this);
     m_state = EXEC;
     
-    SYLAR_LOG_ERROR(g_logger) << getId();
+    // SYLAR_LOG_ERROR(g_logger) << getId();
     if (swapcontext(&t_threadFiber->m_ctx, &m_ctx))
     {
         SYLAR_ASSERT2(false, "swapcontext");

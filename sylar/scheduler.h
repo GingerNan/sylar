@@ -12,12 +12,20 @@
 namespace sylar
 {
 
+/**
+ * @brief 协程调度器
+ * @details N-M的协程调度器. 内部有一个线程池, 支持协程在线程池里切换
+ */
 class Scheduler
 {
 public:
     using ptr = std::shared_ptr<Scheduler>;
     using MutexType = Mutex;
 
+    /**
+     * @param[in] threads 线程数量
+     * @param[in] user_caller 是否使用当前调用线程
+     */
     Scheduler(size_t threads = 1, bool user_caller = true, const std::string& name = "");
     virtual ~Scheduler();
 
@@ -29,6 +37,7 @@ public:
     void start();
     void stop();
 
+    // 调度协程
     template<class FiberOrCb>
     void schedule(FiberOrCb fc, int thread = -1)
     {
@@ -44,6 +53,7 @@ public:
         }
     }
 
+    // 批量调度协程
     template<class InputIterator>
     void schedule(InputIterator begin, InputIterator end)
     {
@@ -67,6 +77,7 @@ protected:
     virtual bool stopping();        // 返回是否可以停止
     virtual void idle();            // 协程无任务可调度时执行idel协程
 
+    // 协程调度函数
     void run();
     void setThis();
 
