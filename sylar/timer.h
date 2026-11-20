@@ -19,15 +19,14 @@ class Timer : public std::enable_shared_from_this<Timer>
 public:
     using ptr = std::shared_ptr<Timer>;
 
+    bool cancel();
+    bool refresh();
+    bool reset(uint64_t ms, bool from_now);
 private:
     Timer(uint64_t ms, std::function<void()> cb,
         bool recurring, TimerManager* manager);
 
     Timer(uint64_t next);
-
-    bool cancel();
-    bool refresh();
-    bool reset(uint64_t ms, bool from_now);
 
     // 比较器
     struct Comparator {
@@ -68,7 +67,6 @@ protected:
     virtual void onTimerInsertedAtFront() = 0;
 
     void addTimer(Timer::ptr val, RWMutexType::WriteLock& lock);
-
 private:
     // 判断时间是否更改
     bool detectClockRollover(uint64_t now_ms);
