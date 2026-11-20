@@ -6,19 +6,24 @@
 namespace sylar
 {
 
+/**
+ * @brief 基于Epoll的IO协程调度器
+ */
 class IOManager : public Scheduler
 {
 public:
     using ptr = std::shared_ptr<IOManager>;
     using RWMutexType = RWMutex;
 
+    // IO 事件
     enum Event {
         NONE    = 0x0,
-        READ    = 0x1,      // 读事件
-        WRITE   = 0x2,      // 写事件
+        READ    = 0x1,      // 读事件(EPOLLIN)
+        WRITE   = 0x4,      // 写事件(EPOLLON)
     };
 
 private:
+    // Socket事件上下文
     struct FdContext {
         using MutexType = Mutex;
 
