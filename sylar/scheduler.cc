@@ -1,6 +1,7 @@
 #include "scheduler.h"
 #include "log.h"
 #include "macro.h"
+#include "hook.h"
 
 namespace sylar
 {
@@ -158,6 +159,7 @@ void Scheduler::stop()
 void Scheduler::run()
 {
     SYLAR_LOG_INFO(g_logger) << "run";
+    set_hook_enable(true);
     Fiber::GetThis();
     setThis();
     if (sylar::GetThreadId() != m_rootThread)

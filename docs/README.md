@@ -105,6 +105,28 @@ run()
     2.无任务执行，执行idle
 ```
 
+```
+Timer -> addTimer() --> cancel()
+获取当前的定时器触发离现在的时间差
+返回当前需要触发的定时器
+```
+
+```
+        [Fiber]                    [Timer]
+            ^N                        ^
+            |                         |
+            |1                        |
+        [Thread]                [TimerManager]
+            ^M                        ^
+            |                         |
+            |1                        |
+        [scheduler] <-------- [IOManager(epoll)]
+```
+
+## HOOK
+sleep,
+usleep
+
 ## socket函数库
 
 ## http协议开发
