@@ -1,27 +1,21 @@
 #include "sylar/sylar.h"
 #include "sylar/iomanager.h"
 
+#include <iostream>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <fcntl.h>
+#include <sys/epoll.h>
 
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 
+int sock = 0;
+
 void test_fiber()
 {
-    SYLAR_LOG_INFO(g_logger) << "test_fiber";
-}
-
-void test1()
-{
-    /** BUG
-     *   在 use_caller 传入 false 的时候，会导致 Scheduler::t_scheduler 一直为空指针，
-     * 在 IOManager::triggerEvent() 中调用 ctx.scheduler 也是 nullptr 这里会段错误。
-     */ 
-    sylar::IOManager iom(2, false);
-    iom.scheduler(&test_fiber);
+    SYLAR_LOG_INFO(g_logger) << "test_fiber sock=" << sock;
 
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     fcntl(sock, F_SETFL, O_NONBLOCK);
@@ -32,18 +26,39 @@ void test1()
     addr.sin_port = htons(9999);
     inet_pton(AF_INET, "127.0.0.1", &addr.sin_addr.s_addr);
     
-    connect(sock, (const sockaddr*)&addr, sizeof(addr));
+    if(!connect(sock, (const sockaddr*)&addr, sizeof(addr)))
+    {
+    }
+    else if (errno == EINPROGRESS)
+    {
+        SYLAR_LOG_INFO(g_logger) << "add event errnor=" << errno << " " << strerror(errno);
+        sylar::IOManager::GetThis()->addEvent(sock, sylar::IOManager::READ, [](){
+            SYLAR_LOG_INFO(g_logger) << "read callback";
+        });
 
-    iom.addEvent(sock, sylar::IOManager::READ, [](){
-        SYLAR_LOG_INFO(g_logger) << "read callback";
-    });
+        sylar::IOManager::GetThis()->addEvent(sock, sylar::IOManager::WRITE, [sock](){
+            SYLAR_LOG_INFO(g_logger) << "write callback";
+            sylar::IOManager::GetThis()->cancelEvent(sock, sylar::IOManager::READ);
+            close(sock);
+        });
+    }
+    else
+    {
+        SYLAR_LOG_INFO(g_logger) << "else " << errno << " " << strerror(errno);
+    }
+}
 
-    iom.addEvent(sock, sylar::IOManager::WRITE, [sock](){
-        SYLAR_LOG_INFO(g_logger) << "write callback";
-        sylar::IOManager::GetThis()->cancelEvent(sock, sylar::IOManager::READ);
-        close(sock);
-    });
+void test1()
+{
+    std::cout << "EPOLLIN=" << EPOLLIN
+        << " EPOLLOUT=" << EPOLLOUT << std::endl;
 
+    /** BUG
+     *   在 use_caller 传入 false 的时候，会导致 Scheduler::t_scheduler 一直为空指针，
+     * 在 IOManager::triggerEvent() 中调用 ctx.scheduler 也是 nullptr 这里会段错误。
+     */ 
+    sylar::IOManager iom(2, false);
+    iom.scheduler(&test_fiber);
 }
 
 int main(int argc, char** argv)
