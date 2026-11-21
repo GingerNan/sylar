@@ -164,7 +164,7 @@ int IOManager::addEvent(int fd, Event event, std::function<void()> cb)
         event_ctx.fiber = Fiber::GetThis();
         SYLAR_ASSERT(event_ctx.fiber->getState() == Fiber::EXEC);
     }
-    return 1;
+    return 0;
 }
     
 bool IOManager::delEvent(int fd, Event event)

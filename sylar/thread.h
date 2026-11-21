@@ -12,7 +12,7 @@
 namespace sylar
 {
 
-class Thread
+class Thread : Noncopyable
 {
 public:
     using ptr = std::shared_ptr<Thread>;
@@ -33,13 +33,9 @@ public:
     static void SetName(const std::string& name);
 
 private:
-    Thread(const Thread&) = delete;
-    Thread(Thread&&) = delete;
-    Thread& operator=(const Thread&) = delete;
-    Thread& operator=(Thread&&) = delete;
-
     // 线程执行函数
     static void* run(void* arg);
+    
 private:
     pid_t m_id = -1;                // 线程id
     pthread_t m_thread = 0;         // 线程结构
