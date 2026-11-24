@@ -128,6 +128,19 @@ sleep,
 usleep
 
 ## socket函数库
+```
+        [UnixAddress]
+              |
+         -----------                    | - [IPv4Address]
+          |Address| --- [IPAddress] --- |
+         -----------                    | - [IPv6Address]
+              |
+              |
+         -----------
+          | Socket |
+         -----------
+```
+connect, accept, read/write
 
 ## http协议开发
 
