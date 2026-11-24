@@ -20,11 +20,39 @@ void test()
     {
         SYLAR_LOG_INFO(g_logger) << i << " - " << addrs[i]->toString();
     }
+}
 
+// 测试网卡
+void test_face()
+{
+    std::multimap<std::string, std::pair<sylar::Address::ptr, uint32_t>> results;
+    bool v = sylar::Address::GetInterfaceAddresses(results);
+    if (!v)
+    {
+        SYLAR_LOG_INFO(g_logger) << "GetInterfaceAddresses fail";
+        return;
+    }
+
+    for (auto& i : results)
+    {
+        SYLAR_LOG_INFO(g_logger) << i.first << " - " << i.second.first->toString()
+            << " - " << i.second.second;
+    }
+}
+
+void test_ipv4()
+{
+    // auto addr = sylar::IPAddress::Create("www.baidu.com");
+    auto addr = sylar::IPAddress::Create("127.0.0.8");
+    if (addr) {
+        SYLAR_LOG_INFO(g_logger) << addr->toString();
+    }
 }
 
 int main(int argc, char** argv)
 {
-    test();
+    // test();
+    // test_face();
+    test_ipv4();
     return 0;
 }
