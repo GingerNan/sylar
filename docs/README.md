@@ -142,6 +142,11 @@ usleep
 ```
 connect, accept, read/write
 
+## 序列化bytearray
+
+write(int, float, int64, ...)
+read(int, floag, int64, ...)
+
 ## http协议开发
 
 ## 分布协议
