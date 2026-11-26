@@ -422,7 +422,6 @@ void ByteArray::write(const void* buf, size_t size)
     addCapacity(size);
 
     size_t npos = m_position % m_baseSize;
-    SYLAR_LOG_INFO(g_logger) << "------ m_cur->size=" << m_cur->size << " - npos=" << npos;
     size_t ncap = m_cur->size - npos;
     size_t bpos = 0;
 
@@ -612,7 +611,7 @@ void ByteArray::addCapacity(size_t size)
     size = size - old_cap;
     size_t count = (size / m_baseSize) + (((size % m_baseSize) > old_cap) ? 1 : 0);
     Node* tmp = m_root;
-    while (tmp)
+    while (tmp->next)
     {
         tmp = tmp->next;
     }
