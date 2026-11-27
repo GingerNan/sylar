@@ -149,6 +149,28 @@ read(int, floag, int64, ...)
 
 ## http协议开发
 
+HTTP/1.1 - API
+
+HttpRequest;
+HttpResponse;
+
+GET / HTTP/1.1
+host: www.baidu.com
+
+HTTP/1.1 200 OK
+Accept-Ranges: bytes
+Cache-Control: no-cache
+Connection: keep-alive
+Content-Length: 17143
+
+uri: http://www.baidu.com/page/xxx?id=10&20#fr
+    http    协议
+    www.sylar.top host
+    80      端口
+    /page/xxx path
+    id=10&v=20 param
+    fr fragment
+
 ## 分布协议
 
 ## 推荐系统
